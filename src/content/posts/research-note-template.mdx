@@ -1,0 +1,52 @@
+---
+title: "Research note template"
+description: "A private working template for your next experiment."
+date: 2026-11-05
+draft: true
+tags: [Experiments]
+---
+
+This is an unpublished template. Replace the prompts with your research, then explicitly set `draft: false` when the note is ready.
+
+## Question
+
+What are you trying to understand? State a testable hypothesis.
+
+## Setup
+
+Describe the model, dataset, baselines, evaluation protocol, seeds, and compute. Link to the relevant code commit and configuration.
+
+```python
+# Example only: replace this with your experiment.
+import numpy as np
+
+def mean_reward(rewards):
+    return np.mean(rewards)
+```
+
+Inline math works with $x_i$. Display equations use double dollar signs:
+
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i
+$$
+
+## Results
+
+Add the actual results and uncertainty. Do not draw conclusions from a single seed.
+
+| Method | Metric | Seeds |
+| :--- | ---: | ---: |
+| Baseline | — | — |
+| Experiment | — | — |
+
+Put exported figures in `public/figures/`, then embed them with `![A useful description](/figures/your-figure.png)`. Include a caption explaining what the figure shows.
+
+## Limitations and next steps
+
+What is uncertain, what did not work, and what would change your interpretation?
+
+## References
+
+Add links to papers, code, and data. Markdown footnotes are supported.[^example]
+
+[^example]: Replace this example footnote with a source or a methodological detail.

@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import PostRow from '../components/PostRow.astro';
+import { getPosts, previewingDrafts } from '../lib/posts';
+import { site } from '../site';
+const posts = await getPosts();
+---
+<Base draft={previewingDrafts}>
+  <div class="container">
+    {previewingDrafts && <aside class="draft-notice">Local draft preview. Drafts are excluded from published builds.</aside>}
+    <section class="home-intro" aria-labelledby="home-title">
+      <h1 id="home-title">Research notes<span class="accent">.</span></h1>
+      <p>{site.description}</p>
+    </section>
+    <section class="writing" aria-labelledby="writing-title">
+      <div class="section-heading"><h2 id="writing-title">Writing</h2><span aria-label={`${posts.length} entries`}>{String(posts.length).padStart(2, '0')}</span></div>
+      {posts.length > 0 ? <ul class="post-list">{posts.map(post => <PostRow post={post} />)}</ul> : <p class="empty-notebook">The first research note is on its way.</p>}
+    </section>
+  </div>
+</Base>

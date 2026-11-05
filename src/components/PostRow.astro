@@ -1,0 +1,17 @@
+---
+import Arrow from './Arrow.astro';
+import { formatDate, postUrl, readingTime, type Post } from '../lib/posts';
+interface Props { post: Post }
+const { post } = Astro.props;
+---
+<li class="post-row">
+  <div class="post-meta">
+    <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+    <p>{post.data.tags[0] ?? 'Notes'} · {readingTime(post)}{post.data.draft && ' · Draft'}</p>
+  </div>
+  <div class="post-summary">
+    <h3><a href={postUrl(post)}>{post.data.title}</a></h3>
+    <p>{post.data.description}</p>
+  </div>
+  <span class="post-arrow"><Arrow size={28} /></span>
+</li>

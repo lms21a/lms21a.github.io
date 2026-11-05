@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../site';
+---
+<Base title="About" section="about">
+  <div class="article-shell about-page">
+    <h1>About this notebook<span class="accent">.</span></h1>
+    <div class="prose">
+      <p class="article-lead">{site.description}</p>
+      <p>This is {site.author}’s research notebook: a place for experiment notes, results, and open questions.</p>
+      <p>Entries can bring together the question behind an experiment, the evidence, and the details needed to understand or reproduce it.</p>
+      <p>Find projects on <a href={site.github}>GitHub</a>, or <a href="/rss.xml">follow the notebook via RSS</a>.</p>
+    </div>
+  </div>
+</Base>
