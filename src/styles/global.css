@@ -59,12 +59,15 @@ p { margin: 0; }
 .back-link { display: inline-flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 23px; font-weight: 500; }
 .article-header { margin-block: 40px 26px; padding-bottom: 30px; border-bottom: 1px solid var(--rule); }
 .article-header h1, .about-page > h1 { margin: 0 0 25px; font-size: clamp(42px, 6.4vw, 64px); font-weight: 600; line-height: 1.04; letter-spacing: -0.028em; }
+.article-header h1 { margin-bottom: 12px; }
 .article-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 10px; color: var(--muted); font-size: 18px; line-height: 1.6; }
 .updated { margin-top: 8px; font-size: 15px; color: var(--muted); }
-.prose { font-size: 20px; line-height: 1.6; overflow-wrap: break-word; }
+.prose { font-size: 19px; line-height: 1.7; overflow-wrap: break-word; }
 .prose > * + * { margin-top: 22px; }
 .prose .article-lead { font-size: 26px; line-height: 1.4; margin-bottom: 20px; letter-spacing: -0.015em; }
-.prose h2 { font-size: 36px; font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin: 42px 0 18px; }
+.prose h2 { font-size: 36px; font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin: 42px 0 12px; }
+.prose h2 + p { margin-top: 12px; }
+.prose a[href='/rss.xml'] { font-family: var(--serif); font-size: 23px; }
 .prose h3 { font-size: 28px; line-height: 1.25; margin: 32px 0 14px; }
 .prose h4 { font-size: 21px; line-height: 1.4; }
 .prose ul, .prose ol { padding-left: 28px; }
