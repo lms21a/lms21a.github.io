@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import chapterZero from '../assets/journey/chapter-00.png';
+import { journeyChapters, formatJourneyScore } from '../data/benchmark-journey';
+
+interface Props {
+  chapter?: string;
+  illustration?: ImageMetadata;
+}
+const { chapter = 'instruct', illustration = chapterZero } = Astro.props;
+const chapterIndex = journeyChapters.findIndex(item => item.id === chapter);
+if (chapterIndex < 0) throw new Error(`Unknown benchmark journey chapter: ${chapter}`);
+const available = journeyChapters.slice(0, chapterIndex + 1);
+---
+<figure class="benchmark-journey" data-benchmark-journey>
+  <div class="journey-art">
+    <Image src={illustration} alt="An illustrated mechanical apprentice in a green cloak and rust-colored scarf follows a mountain training journey." width={1200} format="webp" quality={88} loading="lazy" />
+    <span class="art-label">The training arc</span>
+  </div>
+  <div class="journey-content">
+    <div class="journey-kicker"><span>Chapter <span data-chapter-number>{String(chapterIndex).padStart(2, '0')}</span></span><span class="checkpoint-label">Checkpoint</span></div>
+    <nav aria-label="Training journey chapters">
+      <ol class="chapter-rail">
+        {journeyChapters.map((item, index) => <li>
+          <button type="button" data-chapter-button={index} disabled={index > chapterIndex} aria-current={index === chapterIndex ? 'step' : undefined} aria-label={`Chapter ${index}: ${item.shortTitle}${index > chapterIndex ? ', later in the journey' : ''}`}>
+            <span class="chapter-node">{index > chapterIndex ? <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="4" y="7" width="8" height="6" rx="1" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg> : String(index).padStart(2, '0')}</span>
+            <span class="chapter-name">{item.shortTitle}</span>
+          </button>
+        </li>)}
+      </ol>
+    </nav>
+    {available.map((item, index) => <section class="journey-frame" data-journey-frame={index} hidden={index !== chapterIndex} aria-label={item.title}>
+      <h2>{item.title}</h2>
+      <p class="journey-model">{item.model}</p>
+      <p class="journey-note">{item.note}</p>
+      <div class="benchmark-board">
+        {item.benchmarks.map(benchmark => <div class="benchmark-result">
+          <h3>{benchmark.label}</h3>
+          <dl>
+            <div><dt>Pass @ 1</dt><dd class:list={{ unmeasured: benchmark.passAt1 === null }}>{formatJourneyScore(benchmark.passAt1)}</dd></div>
+            <div><dt>Pass @ 8</dt><dd class:list={{ unmeasured: benchmark.passAt8 === null }}>{formatJourneyScore(benchmark.passAt8)}</dd></div>
+          </dl>
+          {benchmark.passAt1 === null && <p class="unmeasured-label">No verified score yet</p>}
+        </div>)}
+      </div>
+      <details class="benchmark-protocol">
+        <summary>Measurements and sources</summary>
+        <ul>{item.benchmarks.map(benchmark => <li><strong>{benchmark.label}.</strong> {benchmark.protocol}</li>)}</ul>
+        <p>An em dash means no verified measurement is attached to this checkpoint. A measured zero is shown as 0.00%. Changes in puzzle panels or token budgets are stated here.</p>
+        {item.source && <a href={item.source.href}>{item.source.label}<span aria-hidden="true"> ↗</span></a>}
+      </details>
+    </section>)}
+  </div>
+  <figcaption>Chapter artwork is illustrative. Scores come from the recorded checkpoint evaluations.</figcaption>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-benchmark-journey]').forEach(journey => {
+    const controls = journey.querySelectorAll<HTMLButtonElement>('[data-chapter-button]');
+    const frames = journey.querySelectorAll<HTMLElement>('[data-journey-frame]');
+    controls.forEach(button => button.addEventListener('click', () => {
+      const selected = button.dataset.chapterButton;
+      controls.forEach(control => {
+        if (control === button) control.setAttribute('aria-current', 'step');
+        else control.removeAttribute('aria-current');
+      });
+      frames.forEach(frame => {
+        frame.hidden = frame.dataset.journeyFrame !== selected;
+        if (!frame.hidden && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          frame.animate([{ opacity: 0.2, transform: 'translateY(5px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 220, easing: 'ease-out' });
+        }
+      });
+      const number = journey.querySelector<HTMLElement>('[data-chapter-number]');
+      if (number && selected) number.textContent = selected.padStart(2, '0');
+    }));
+  });
+</script>
+
+<style>
+  .benchmark-journey { margin-block: 42px; border: 1px solid #cbd3c4; background: #f1f1e8; border-radius: 4px; overflow: hidden; }
+  .journey-art { position: relative; }
+  .journey-art img { display: block; width: 100%; height: auto; margin: 0; }
+  .art-label { position: absolute; left: 21px; top: 20px; background: #f8f7f3ed; padding: 7px 11px; font-family: var(--serif); font-style: italic; font-size: 18px; line-height: 1.3; color: #3d4938; border: 1px solid #e0e0d0; }
+  .journey-content { padding: 26px 30px 28px; }
+  .journey-kicker { display: flex; justify-content: space-between; align-items: baseline; color: var(--green); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .checkpoint-label { color: #737767; font-size: 10px; font-weight: 500; }
+  .chapter-rail { display: flex; margin: 20px 0 26px; padding: 0 !important; list-style: none; overflow-x: auto; scrollbar-width: thin; }
+  .chapter-rail li { position: relative; flex: 1 0 80px; margin: 0; }
+  .chapter-rail li::before { content: ''; position: absolute; left: 0; right: 0; top: 15px; border-top: 1px solid #cbd3c4; }
+  .chapter-rail li:first-child::before { left: 50%; }
+  .chapter-rail li:last-child::before { right: 50%; }
+  .chapter-rail button { position: relative; display: flex; width: 100%; flex-direction: column; align-items: center; gap: 9px; appearance: none; border: 0; background: transparent; padding: 0 3px 8px; color: var(--muted); font-family: var(--sans); line-height: 1.4; cursor: pointer; }
+  .chapter-node { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 50%; border: 1px solid #c3ccba; background: #f1f1e8; color: #697563; font-family: ui-monospace, monospace; font-size: 10px; }
+  button[aria-current='step'] .chapter-node { color: #f8f7f3; border-color: var(--green); background: var(--green); box-shadow: 0 0 0 4px #dfe5d5; }
+  button[aria-current='step'] .chapter-name { color: var(--green); font-weight: 600; }
+  .chapter-name { font-size: 10px; }
+  .chapter-rail button:disabled { cursor: default; }
+  .chapter-rail button:disabled .chapter-name { color: #7d8374; }
+  .chapter-rail button:focus-visible, summary:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+  .journey-frame > h2 { font-size: 36px; font-weight: 550; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.025em; }
+  .journey-model { font-size: 13px; line-height: 1.6; font-weight: 500; color: var(--green); margin: 0; }
+  .journey-note { font-size: 14px; line-height: 1.6; color: #656d5c; margin: 12px 0 0; max-width: 580px; }
+  .benchmark-board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 24px; border-block: 1px solid #cbd3c4; }
+  .benchmark-result { padding-block: 18px; }
+  .benchmark-result + .benchmark-result { border-left: 1px solid #cbd3c4; padding-left: 23px; margin-left: 23px; }
+  .benchmark-result h3 { font-family: var(--serif); font-size: 24px; font-weight: 550; line-height: 1.3; margin: 0 0 14px; }
+  .benchmark-result dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+  .benchmark-result dt { font-family: var(--sans); font-size: 11px; line-height: 1.5; color: var(--muted); }
+  .benchmark-result dd { font-family: var(--serif); font-size: clamp(27px, 3.3vw, 38px); line-height: 1.2; color: var(--green); margin: 5px 0 0; font-variant-numeric: tabular-nums lining-nums; }
+  .benchmark-result dd.unmeasured { color: #98a08c; }
+  .unmeasured-label { font-size: 10px; line-height: 1.5; color: #737767; margin: 8px 0 0; }
+  .benchmark-protocol { margin-top: 18px; }
+  .benchmark-protocol summary { color: var(--green); font-size: 12px; line-height: 1.7; cursor: pointer; }
+  .benchmark-protocol ul { padding-left: 19px; font-size: 12px; line-height: 1.7; color: #636b59; margin-block: 14px; }
+  .benchmark-protocol p, .benchmark-protocol a { font-size: 12px; line-height: 1.7; }
+  .benchmark-protocol p { color: #636b59; margin-bottom: 10px; }
+  .benchmark-journey > figcaption { padding: 0 30px 20px; font-size: 11px; line-height: 1.6; text-align: left; color: #737767; margin: 0; }
+  [hidden] { display: none !important; }
+  @media (max-width: 620px) {
+    .journey-content { padding: 23px 18px 20px; }
+    .art-label { top: 12px; left: 12px; font-size: 15px; padding: 5px 8px; }
+    .chapter-rail { margin-top: 18px; }
+    .chapter-rail li { flex-basis: 73px; }
+    .journey-frame > h2 { font-size: 31px; }
+    .benchmark-board { grid-template-columns: minmax(0, 1fr); }
+    .benchmark-result { padding-block: 17px; }
+    .benchmark-result + .benchmark-result { border-left: 0; border-top: 1px solid #cbd3c4; padding-left: 0; margin-left: 0; }
+    .benchmark-result h3 { font-size: 23px; margin-bottom: 12px; }
+    .benchmark-result dd { font-size: 37px; }
+    .benchmark-journey > figcaption { padding-inline: 18px; }
+    .benchmark-protocol summary { min-height: 40px; display: list-item; padding-block: 9px; }
+  }
+</style>

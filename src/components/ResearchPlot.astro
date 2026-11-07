@@ -1,0 +1,17 @@
+---
+import type { ImageMetadata } from 'astro';
+interface Props {
+  desktop: ImageMetadata;
+  mobile: ImageMetadata;
+  alt: string;
+}
+const { desktop, mobile, alt } = Astro.props;
+---
+<picture class="research-plot">
+  <source media="(max-width: 620px)" srcset={mobile.src} width={mobile.width} height={mobile.height} />
+  <img src={desktop.src} width={desktop.width} height={desktop.height} alt={alt} loading="lazy" decoding="async" />
+</picture>
+<style>
+  .research-plot { display: block; }
+  .research-plot img { display: block; width: 100%; height: auto; margin: 0; }
+</style>

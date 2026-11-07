@@ -1,0 +1,74 @@
+---
+import trace from '../data/countdown-trace.json';
+
+const start = trace.response.indexOf(trace.excerpt_start);
+const end = trace.response.indexOf(trace.excerpt_end) + trace.excerpt_end.length;
+if (start < 0 || end < start) throw new Error('Countdown excerpt does not match the archived response.');
+const excerpt = trace.response.slice(start, end);
+---
+<figure class="countdown-trace" data-countdown-trace>
+  <div class="trace-heading">
+    <p class="trace-kicker">From the archive · Countdown</p>
+    <p class="trace-title">Search, then check</p>
+    <p class="trace-intro">One successful response from the checkpoint we carried into Futoshiki.</p>
+  </div>
+  <div class="countdown-state" aria-label={`Use ${trace.numbers.join(', ')} to make ${trace.target}`}>
+    <div class="number-set" aria-hidden="true">{trace.numbers.map(number => <span>{number}</span>)}</div>
+    <span class="target"><small>Target</small><strong>{trace.target}</strong></span>
+  </div>
+  <div class="trace-excerpt">
+    <p class="excerpt-label">Model response · verbatim excerpt</p>
+    <pre>{excerpt}</pre>
+  </div>
+  <div class="trace-result">
+    <code>{trace.grade.expression} = {trace.target}</code>
+    <span>Final answer accepted</span>
+  </div>
+  <details class="trace-full">
+    <summary>Read the complete archived response</summary>
+    <pre>{trace.response}</pre>
+    <p>{trace.tokens} generated tokens · 4,096-token budget · validation example {trace.source.dataset_index + 1} of 128.</p>
+  </details>
+  <figcaption>Selected to illustrate candidate expressions and an explicit check. This example does not establish how often either occurs; the verifier checks the final answer, not every claim in the prose.</figcaption>
+</figure>
+
+<style>
+  .countdown-trace { margin-block: 36px; border: 1px solid var(--rule); border-radius: 4px; background: #f5f4ef; overflow: hidden; }
+  .trace-heading { padding: 23px 25px 0; }
+  .trace-heading p { margin: 0; }
+  .trace-kicker { color: var(--green); font-size: 10px; line-height: 1.6; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+  .trace-heading .trace-title { font-family: var(--serif); font-size: 30px; line-height: 1.2; margin-top: 7px; font-weight: 550; }
+  .trace-heading .trace-intro { color: var(--muted); font-size: 13px; line-height: 1.6; margin-top: 8px; }
+  .countdown-state { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 21px 25px; }
+  .number-set { display: flex; flex-wrap: wrap; gap: 8px; }
+  .number-set span { display: grid; place-items: center; width: 45px; height: 48px; border: 1px solid #c7cebf; border-radius: 3px; background: #e9ecdf; color: var(--green); font-family: var(--serif); font-size: 28px; line-height: 1; }
+  .target { display: flex; align-items: center; gap: 10px; color: var(--green); }
+  .target small { font-size: 11px; }
+  .target strong { font-family: var(--serif); font-size: 38px; font-weight: 500; line-height: 1; }
+  .trace-excerpt { padding: 20px 25px; background: #faf9f5; border-block: 1px solid var(--rule); }
+  .excerpt-label { margin: 0 0 13px; color: var(--muted); font-size: 10px; line-height: 1.6; text-transform: uppercase; letter-spacing: .06em; }
+  .countdown-trace pre { background: transparent; color: var(--ink); padding: 0; margin: 0; border: 0; border-radius: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.85; }
+  .trace-result { padding: 17px 25px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .trace-result code { font-size: 13px; line-height: 1.6; color: var(--green); background: transparent; padding: 0; overflow-wrap: anywhere; }
+  .trace-result > span { color: var(--green); font-size: 10px; line-height: 1.6; }
+  .trace-full { padding: 0 25px 20px; }
+  .trace-full summary { cursor: pointer; color: var(--green); font-size: 12px; line-height: 1.7; }
+  .trace-full summary:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .trace-full pre { padding-block: 17px; }
+  .trace-full p { color: var(--muted); font-size: 11px; line-height: 1.7; margin: 0; }
+  .countdown-trace figcaption { padding: 0 25px 23px; font-size: 11px; line-height: 1.7; color: var(--muted); margin: 0; text-align: left; }
+  @media (max-width: 620px) {
+    .trace-heading { padding: 20px 17px 0; }
+    .trace-heading .trace-title { font-size: 27px; }
+    .countdown-state { padding: 20px 17px; gap: 10px; }
+    .number-set { gap: 5px; }
+    .number-set span { width: 35px; height: 41px; font-size: 25px; }
+    .target { gap: 6px; }
+    .target strong { font-size: 32px; }
+    .trace-excerpt { padding: 19px 17px; }
+    .trace-result { padding: 17px; }
+    .trace-full { padding-inline: 17px; }
+    .trace-full summary { min-height: 44px; padding-block: 10px; }
+    .countdown-trace figcaption { padding-inline: 17px; }
+  }
+</style>

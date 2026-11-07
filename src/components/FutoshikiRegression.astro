@@ -1,0 +1,47 @@
+---
+import ResearchPlot from './ResearchPlot.astro';
+import desktop from '../assets/research/futoshiki-regression.png';
+import mobile from '../assets/research/futoshiki-regression-mobile.png';
+import data from '../data/futoshiki-regression.json';
+const percent = (value: number) => `${(value * 100).toFixed(2)}%`;
+---
+<figure class="futoshiki-regression" data-futoshiki-regression>
+  <p class="chart-kicker">The first 5×5 continuation</p>
+  <p class="chart-title">More training, less ground held</p>
+  <ResearchPlot desktop={desktop} mobile={mobile} alt="The 32-puzzle monitor declines unevenly from update 100 to 350, with a partial recovery at the end. On a separate matched 128-puzzle test, pass@1 falls from 12.89% at update 100 to 8.30% at update 350." />
+  <figcaption>Two separate panels, each with eight attempts per puzzle and an 8,192-token cap. The smaller monitor partly recovers at update 350. The matched test compares the same 128 puzzles at updates 100 and 350.</figcaption>
+  <details>
+    <summary>Panels, exact counts, and uncertainty</summary>
+    <p class="table-title">Matched test · 128 puzzles × 8 attempts</p>
+    <table><thead><tr><th scope="col">Update</th><th scope="col">Correct attempts</th><th scope="col">Pass@1</th></tr></thead>
+      <tbody>{data.matched_test.points.map(point => <tr><th scope="row">{point.step}</th><td>{point.correct}/{point.completions}</td><td>{percent(point.pass_at_1)}</td></tr>)}</tbody>
+    </table>
+    <p class="uncertainty">Change: {(data.matched_test.change * 100).toFixed(2)} percentage points. Paired puzzle-bootstrap 95% interval: {(data.matched_test.paired_puzzle_bootstrap_95ci[0] * 100).toFixed(2)} to {(data.matched_test.paired_puzzle_bootstrap_95ci[1] * 100).toFixed(2)} points. This interval describes variation over puzzles in one training run.</p>
+    <p class="table-title">Repeated monitor · 32 puzzles × 8 attempts</p>
+    <table><thead><tr><th scope="col">Update</th><th scope="col">Correct attempts</th><th scope="col">Pass@1</th></tr></thead>
+      <tbody>{data.monitor.points.map(point => <tr><th scope="row">{point.step}</th><td>{point.correct}/{point.completions}</td><td>{percent(point.pass_at_1)}</td></tr>)}</tbody>
+    </table>
+    <a href="https://wandb.ai/lukas928/simple-pt/runs/wqr694h1">Recorded continuation run ↗</a>
+  </details>
+</figure>
+<style>
+  .futoshiki-regression { margin-block: 36px; padding-block: 25px; border-block: 1px solid var(--rule); }
+  .chart-kicker { margin: 0 0 9px; color: #965f45; font-size: 10px; line-height: 1.6; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+  .chart-title { margin: 0 0 20px; font-family: var(--serif); font-size: 30px; line-height: 1.2; font-weight: 550; }
+  .futoshiki-regression figcaption { color: var(--muted); font-size: 11px; line-height: 1.7; text-align: left; margin-top: 12px; }
+  .futoshiki-regression details { margin-top: 18px; }
+  .futoshiki-regression summary { color: var(--green); font-size: 12px; line-height: 1.7; cursor: pointer; }
+  summary:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .table-title { color: var(--green); font-size: 13px; line-height: 1.6; margin: 20px 0 8px; }
+  .futoshiki-regression table { display: table; width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.6; }
+  .futoshiki-regression th, .futoshiki-regression td { min-width: 0; padding: 9px 6px; border-bottom: 1px solid var(--rule); text-align: right; }
+  .futoshiki-regression th:first-child { text-align: left; }
+  .futoshiki-regression th { font-weight: 500; }
+  .uncertainty { font-size: 11px; color: var(--muted); line-height: 1.7; margin-top: 12px; }
+  .futoshiki-regression details > a { display: inline-block; font-size: 12px; margin-top: 17px; }
+  @media (max-width: 620px) {
+    .chart-title { font-size: 26px; }
+    .futoshiki-regression summary { min-height: 44px; padding-block: 10px; }
+    .futoshiki-regression table { font-size: 11px; }
+  }
+</style>

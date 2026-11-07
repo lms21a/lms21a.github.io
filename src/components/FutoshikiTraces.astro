@@ -1,0 +1,87 @@
+---
+import data from '../data/futoshiki-traces.json';
+import FutoshikiTraceGrid from './FutoshikiTraceGrid.astro';
+---
+<figure class="futoshiki-traces" data-futoshiki-traces>
+  <p class="traces-kicker">Inside the selected validation peak · update 280</p>
+  <p class="traces-title">A solved puzzle and an unfinished one</p>
+  <p class="traces-intro">Two different hardest-tier puzzles, each with six givens and eight inequalities.</p>
+  <div class="trace-controls" role="group" aria-label="Choose a saved Futoshiki response">
+    {data.traces.map((trace, index) => <button type="button" data-futo-trace={index} aria-pressed={index === 0 ? 'true' : 'false'} aria-controls={`saved-futo-trace-${index}`}><strong>{trace.outcome === 'correct' ? 'Correct final answer' : 'Budget exhausted'}</strong><span>{trace.tokens.toLocaleString('en-US')} tokens</span></button>)}
+  </div>
+  {data.traces.map((trace, index) => <section id={`saved-futo-trace-${index}`} class:list={['trace-panel', { incomplete: trace.outcome !== 'correct' }]} data-futo-trace-panel={index} hidden={index !== 0} aria-label={trace.outcome === 'correct' ? 'Selected correct completion' : 'Selected incomplete completion'}>
+    <div class="budget-label"><span>Generated tokens</span><span>{trace.tokens.toLocaleString('en-US')} / 8,192</span></div>
+    <div class="budget-track" role="meter" aria-label="Completion token budget used" aria-valuemin="0" aria-valuemax="8192" aria-valuenow={trace.tokens}><span style={`width:${trace.tokens / trace.max_tokens * 100}%`}></span></div>
+    {trace.excerpts.map(excerpt => <div class="trace-excerpt"><p>{excerpt.label} · verbatim excerpt</p><pre>{excerpt.text}</pre></div>)}
+    <div class="answer-result">
+      <p>{trace.outcome === 'correct' ? 'Accepted final assignment' : 'No answer block before the token limit'}</p>
+      {trace.submitted_answer && <code>{trace.submitted_answer}</code>}
+    </div>
+    <details class="full-completion"><summary>Read the complete generated response</summary><pre tabindex="0" aria-label="Complete archived model response">{trace.response}</pre></details>
+    <details class="puzzle-input"><summary>Inspect this puzzle and its model input</summary>
+      <FutoshikiTraceGrid puzzle={trace.puzzle} prefix={`saved-trace-${index}`} />
+      <p>Dark digits are fixed; letters identify unknowns. The grid is drawn for the reader. The input below is reconstructed from the stored puzzle and archived chat-template settings; the opening thinking tag is supplied in the input.</p>
+      <pre tabindex="0" aria-label="Reconstructed model input">{trace.model_input}</pre>
+    </details>
+    <details class="trace-provenance"><summary>Selection and provenance</summary>
+      <p>Puzzle: <code>{trace.id}</code></p>
+      <p>Stored puzzle index {trace.puzzle_index}, rollout {trace.rollout_index}, output {trace.output_index} (zero-based). Ending: {trace.finish_reason}. Temperature 1, a single 8,192-token window.</p>
+      <p>These responses come from cumulative update 280, selected on the monitored four-tier validation score. The saved responses remain available; its model weights were later removed. The final retained checkpoint is update 300.</p>
+    </details>
+  </section>)}
+  <figcaption>Selected by outcome: the first stored correct hardest-tier response, then the first stored incorrect response on another puzzle. The accepted assignment is correct, while some earlier claims in its reasoning are unsupported. These examples do not establish how often either behavior occurs.</figcaption>
+</figure>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-futoshiki-traces]').forEach(figure => {
+    const controls = figure.querySelectorAll<HTMLButtonElement>('[data-futo-trace]');
+    const panels = figure.querySelectorAll<HTMLElement>('[data-futo-trace-panel]');
+    controls.forEach(button => button.addEventListener('click', () => {
+      controls.forEach(control => control.setAttribute('aria-pressed', String(control === button)));
+      panels.forEach(panel => {
+        panel.hidden = panel.dataset.futoTracePanel !== button.dataset.futoTrace;
+        panel.querySelectorAll('details').forEach(details => { details.open = false; });
+      });
+    }));
+  });
+</script>
+<style>
+  .futoshiki-traces { margin-block: 36px; padding: 25px; border: 1px solid var(--rule); border-radius: 4px; background: #f3f2ec; }
+  .traces-kicker { font-size: 10px; line-height: 1.6; color: var(--green); font-weight: 600; letter-spacing: .07em; text-transform: uppercase; margin: 0 0 9px; }
+  .traces-title { font-family: var(--serif); font-size: 30px; line-height: 1.2; font-weight: 550; margin: 0; }
+  .traces-intro { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 10px 0 0; }
+  .trace-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; margin-block: 22px; }
+  .trace-controls button { appearance: none; border: 1px solid var(--rule); border-radius: 3px; background: transparent; font-family: var(--sans); color: var(--muted); cursor: pointer; padding: 12px; text-align: left; line-height: 1.5; }
+  .trace-controls strong { display: block; font-size: 12px; font-weight: 550; }
+  .trace-controls button > span { display: block; font-size: 11px; margin-top: 4px; }
+  .trace-controls button[aria-pressed='true'] { color: var(--green); border-color: var(--green); background: #e6ebdd; }
+  .trace-controls button[data-futo-trace='1'][aria-pressed='true'] { color: #965f45; border-color: #ad7a5f; background: #f0e8df; }
+  button:focus-visible, summary:focus-visible, pre:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .budget-label { display: flex; justify-content: space-between; gap: 15px; font-size: 10px; line-height: 1.6; color: var(--muted); }
+  .budget-track { height: 5px; background: #e0e4d8; border-radius: 2px; overflow: hidden; margin-top: 8px; }
+  .budget-track > span { display: block; height: 100%; background: var(--green); }
+  .incomplete .budget-track > span { background: #ad7a5f; }
+  .trace-excerpt { margin-top: 21px; }
+  .trace-excerpt > p { color: var(--muted); font-size: 10px; line-height: 1.6; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 11px; }
+  .futoshiki-traces pre { background: #faf9f5; border: 1px solid var(--rule); border-radius: 3px; padding: 15px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--ink); }
+  .answer-result { padding-block: 18px; border-bottom: 1px solid var(--rule); margin-bottom: 15px; }
+  .answer-result > p { font-size: 11px; color: var(--green); line-height: 1.7; margin: 0; }
+  .incomplete .answer-result > p { color: #965f45; }
+  .answer-result code { display: block; font-size: 12px; line-height: 1.8; padding: 0; margin-top: 10px; white-space: normal; overflow-wrap: anywhere; background: transparent; color: var(--green); }
+  .trace-panel details + details { margin-top: 12px; }
+  .trace-panel summary { cursor: pointer; color: var(--green); font-size: 12px; line-height: 1.7; }
+  .trace-panel details > pre { max-height: 440px; overflow-y: auto; margin-top: 16px; }
+  .puzzle-input > p, .trace-provenance > p { color: var(--muted); font-size: 11px; line-height: 1.7; margin-top: 15px; overflow-wrap: anywhere; }
+  .puzzle-input :global(svg) { margin-top: 17px; }
+  .trace-provenance code { font-size: 10px; background: transparent; color: var(--muted); }
+  .futoshiki-traces figcaption { font-size: 11px; line-height: 1.7; color: var(--muted); text-align: left; margin: 20px 0 0; }
+  [hidden] { display: none !important; }
+  @media (max-width: 620px) {
+    .futoshiki-traces { padding: 22px 16px; }
+    .traces-title { font-size: 26px; }
+    .trace-controls button { padding: 10px; min-height: 66px; }
+    .trace-controls strong { font-size: 12px; }
+    .trace-panel summary { min-height: 44px; padding-block: 10px; }
+    .trace-panel details + details { margin-top: 5px; }
+    .futoshiki-traces pre { padding: 12px; }
+  }
+</style>

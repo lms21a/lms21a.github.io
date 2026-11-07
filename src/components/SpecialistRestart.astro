@@ -1,0 +1,55 @@
+---
+import data from '../data/futoshiki-restart.json';
+const percent = (value: number) => `${(value * 100).toFixed(2)}%`;
+---
+<figure class="specialist-restart" data-specialist-restart>
+  <p class="restart-kicker">A new branch</p>
+  <p class="restart-title">Restart the student, borrow the specialists’ footholds</p>
+  <div class="restart-inputs">
+    <div class="input-card"><span>Student initialization</span><h3>4×4 RL1000</h3><p>Return to the checkpoint before the balanced 5×5 warmup.</p></div>
+    <div class="input-card"><span>Guidance for projection</span><h3>Two 5×5 specialists</h3><p>Verified responses from separately trained checkpoints in the same model lineage.</p></div>
+  </div>
+  <div class="flow-arrow" aria-hidden="true">↓</div>
+  <div class="projection-stage"><h3>Project into the frozen student</h3><p>Propose and refine the examples, verify final answers, and select {data.examples_per_tier.toLocaleString('en-US')} examples per tier.</p></div>
+  <div class="flow-arrow" aria-hidden="true">↓</div>
+  <div class="sft-stage"><h3>Two SFT epochs</h3><p>{data.retained_updates} retained optimizer updates</p></div>
+  <div class="restart-results">
+    <p class="results-label">SFT development results · pass@1</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th scope="col">5×5 tier</th><th scope="col">Specialist</th><th scope="col">Student</th></tr></thead>
+      <tbody>{data.tiers.map(tier => <tr><th scope="row">{tier.label}</th><td>{percent(tier.specialist_pass_at_1)}<small>{tier.specialist_correct}/{tier.samples}</small></td><td>{percent(tier.student_pass_at_1)}<small>{tier.student_correct}/{tier.samples}</small></td></tr>)}</tbody>
+    </table></div>
+  </div>
+  <figcaption>Each development tier uses 256 puzzles × four attempts, with an 8,192-token cap. These scores describe the retained SFT checkpoint; the untouched final test was not evaluated. <a href="https://wandb.ai/lukas928/simple-pt/runs/erc1vxkk">Recorded SFT run ↗</a></figcaption>
+</figure>
+<style>
+  .specialist-restart { margin-block: 36px; padding: 24px; border: 1px solid #cbd3c4; border-radius: 4px; background: #f1f1e8; }
+  .restart-kicker { color: var(--green); font-size: 10px; line-height: 1.6; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 9px; }
+  .restart-title { font-family: var(--serif); font-size: 29px; line-height: 1.2; font-weight: 550; margin: 0 0 24px; }
+  .restart-inputs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; }
+  .input-card { padding: 17px; border: 1px solid #cbd3c4; border-radius: 3px; background: var(--paper); }
+  .input-card > span { color: var(--green); font-size: 10px; line-height: 1.6; }
+  .input-card h3, .projection-stage h3, .sft-stage h3 { font-family: var(--serif); font-size: 23px; line-height: 1.2; font-weight: 550; margin: 9px 0; }
+  .input-card p, .projection-stage p, .sft-stage p { color: var(--muted); font-size: 12px; line-height: 1.7; margin: 0; }
+  .flow-arrow { text-align: center; font-size: 23px; color: #84967b; margin: 7px 0; line-height: 1.4; }
+  .projection-stage, .sft-stage { padding: 16px 20px; text-align: center; background: #e5eadc; border: 1px solid #c5d0bc; border-radius: 3px; }
+  .projection-stage h3, .sft-stage h3 { margin-top: 0; }
+  .sft-stage { background: transparent; }
+  .restart-results { margin-top: 26px; }
+  .results-label { color: var(--green); font-size: 11px; line-height: 1.6; margin: 0 0 12px; }
+  .table-wrap { overflow-x: auto; }
+  .restart-results table { display: table; width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.6; }
+  .restart-results th, .restart-results td { min-width: 0; padding: 10px 5px; border-bottom: 1px solid #cbd3c4; text-align: right; }
+  .restart-results th:first-child { text-align: left; }
+  .restart-results th { font-weight: 500; }
+  .restart-results small { display: block; color: var(--muted); font-size: 10px; line-height: 1.6; margin-top: 3px; }
+  .specialist-restart figcaption { color: var(--muted); font-size: 11px; line-height: 1.7; margin: 16px 0 0; text-align: left; }
+  @media (max-width: 620px) {
+    .specialist-restart { padding: 21px 16px; }
+    .restart-title { font-size: 26px; }
+    .restart-inputs { grid-template-columns: minmax(0,1fr); gap: 12px; }
+    .input-card p, .projection-stage p, .sft-stage p { font-size: 13px; }
+    .restart-results table { font-size: 11px; }
+    .restart-results th:first-child { max-width: 105px; }
+  }
+</style>

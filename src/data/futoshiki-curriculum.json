@@ -1,0 +1,446 @@
+{
+  "protocol": {
+    "puzzles_per_tier": 256,
+    "attempts_per_puzzle": 4,
+    "token_cap": 8192,
+    "inference": "native FP8",
+    "panel_role": "fixed validation panels used for checkpoint monitoring and selection"
+  },
+  "columns": [
+    {
+      "id": "start",
+      "label": "Before RL",
+      "update": 0,
+      "train_tier": null
+    },
+    {
+      "id": "stage1",
+      "label": "After 9 / 5",
+      "update": 100,
+      "train_tier": "5x5_g9_i5"
+    },
+    {
+      "id": "stage2",
+      "label": "After 8 / 7",
+      "update": 200,
+      "train_tier": "5x5_g8_i7"
+    },
+    {
+      "id": "peak",
+      "label": "Validation peak",
+      "update": 280,
+      "train_tier": "5x5_g6_i8"
+    },
+    {
+      "id": "final",
+      "label": "Final",
+      "update": 300,
+      "train_tier": "5x5_g6_i8"
+    }
+  ],
+  "rows": [
+    {
+      "id": "5x5_g11_i5",
+      "label": "Easy",
+      "givens": 11,
+      "inequalities": 5,
+      "values": [
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 364,
+          "pass_at_1": 0.35546875,
+          "pass_at_4": 0.67578125,
+          "cap_hit_rate": 0.4111328125,
+          "mean_tokens": 4503.484375,
+          "generated_tokens": 4611568,
+          "tokens_per_second": 20945.200793108164,
+          "local_update": 0,
+          "tier": "5x5_g11_i5",
+          "split": "expert",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g9i5_flash_mis_sc_async100_from_projection_sft_epoch2_20261017_v3/eval/step_0/expert.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 599,
+          "pass_at_1": 0.5849609375,
+          "pass_at_4": 0.87890625,
+          "cap_hit_rate": 0.0869140625,
+          "mean_tokens": 2721.232421875,
+          "generated_tokens": 2786542,
+          "tokens_per_second": 22024.702905456037,
+          "local_update": 100,
+          "tier": "5x5_g11_i5",
+          "split": "expert",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g9i5_flash_mis_sc_async100_from_projection_sft_epoch2_20261017_v3/eval/step_100/expert.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 722,
+          "pass_at_1": 0.705078125,
+          "pass_at_4": 0.91796875,
+          "cap_hit_rate": 0.1416015625,
+          "mean_tokens": 2352.796875,
+          "generated_tokens": 2409264,
+          "tokens_per_second": 21208.919065005826,
+          "local_update": 100,
+          "tier": "5x5_g11_i5",
+          "split": "expert",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g8i7_continue100_flash_mis_sc_async_from_g9_expert100_20261017/eval/step_100/expert.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 717,
+          "pass_at_1": 0.7001953125,
+          "pass_at_4": 0.91015625,
+          "cap_hit_rate": 0.1552734375,
+          "mean_tokens": 2338.98828125,
+          "generated_tokens": 2395124,
+          "tokens_per_second": 21049.473935743754,
+          "local_update": 80,
+          "tier": "5x5_g11_i5",
+          "split": "expert",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_80/expert.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 692,
+          "pass_at_1": 0.67578125,
+          "pass_at_4": 0.9296875,
+          "cap_hit_rate": 0.181640625,
+          "mean_tokens": 2484.8515625,
+          "generated_tokens": 2544488,
+          "tokens_per_second": 20707.753385833126,
+          "local_update": 100,
+          "tier": "5x5_g11_i5",
+          "split": "expert",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_100/expert.json"
+        }
+      ]
+    },
+    {
+      "id": "5x5_g9_i5",
+      "label": "Next",
+      "givens": 9,
+      "inequalities": 5,
+      "values": [
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 126,
+          "pass_at_1": 0.123046875,
+          "pass_at_4": 0.33984375,
+          "cap_hit_rate": 0.6591796875,
+          "mean_tokens": 6325.3681640625,
+          "generated_tokens": 6477177,
+          "tokens_per_second": 20570.609255396845,
+          "local_update": 0,
+          "tier": "5x5_g9_i5",
+          "split": "next",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g9i5_flash_mis_sc_async100_from_projection_sft_epoch2_20261017_v3/eval/step_0/next.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 301,
+          "pass_at_1": 0.2939453125,
+          "pass_at_4": 0.59765625,
+          "cap_hit_rate": 0.1396484375,
+          "mean_tokens": 4237.3037109375,
+          "generated_tokens": 4338999,
+          "tokens_per_second": 22180.47800001302,
+          "local_update": 100,
+          "tier": "5x5_g9_i5",
+          "split": "next",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g9i5_flash_mis_sc_async100_from_projection_sft_epoch2_20261017_v3/eval/step_100/next.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 429,
+          "pass_at_1": 0.4189453125,
+          "pass_at_4": 0.75,
+          "cap_hit_rate": 0.3388671875,
+          "mean_tokens": 4291.3837890625,
+          "generated_tokens": 4394377,
+          "tokens_per_second": 21131.54622673999,
+          "local_update": 100,
+          "tier": "5x5_g9_i5",
+          "split": "next",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g8i7_continue100_flash_mis_sc_async_from_g9_expert100_20261017/eval/step_100/next.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 411,
+          "pass_at_1": 0.4013671875,
+          "pass_at_4": 0.69921875,
+          "cap_hit_rate": 0.37109375,
+          "mean_tokens": 4086.583984375,
+          "generated_tokens": 4184662,
+          "tokens_per_second": 21033.02916640668,
+          "local_update": 80,
+          "tier": "5x5_g9_i5",
+          "split": "next",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_80/next.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 383,
+          "pass_at_1": 0.3740234375,
+          "pass_at_4": 0.6171875,
+          "cap_hit_rate": 0.4072265625,
+          "mean_tokens": 4343.51171875,
+          "generated_tokens": 4447756,
+          "tokens_per_second": 20834.971319962042,
+          "local_update": 100,
+          "tier": "5x5_g9_i5",
+          "split": "next",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_100/next.json"
+        }
+      ]
+    },
+    {
+      "id": "5x5_g8_i7",
+      "label": "Harder",
+      "givens": 8,
+      "inequalities": 7,
+      "values": [
+        null,
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 203,
+          "pass_at_1": 0.1982421875,
+          "pass_at_4": 0.4765625,
+          "cap_hit_rate": 0.1689453125,
+          "mean_tokens": 4810.1240234375,
+          "generated_tokens": 4925567,
+          "tokens_per_second": 22006.123966709074,
+          "local_update": 0,
+          "tier": "5x5_g8_i7",
+          "split": "harder",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g8i7_continue100_flash_mis_sc_async_from_g9_expert100_20261017/eval/step_0/harder.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 304,
+          "pass_at_1": 0.296875,
+          "pass_at_4": 0.5859375,
+          "cap_hit_rate": 0.455078125,
+          "mean_tokens": 5212.111328125,
+          "generated_tokens": 5337202,
+          "tokens_per_second": 20808.53327270457,
+          "local_update": 100,
+          "tier": "5x5_g8_i7",
+          "split": "harder",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g8i7_continue100_flash_mis_sc_async_from_g9_expert100_20261017/eval/step_100/harder.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 329,
+          "pass_at_1": 0.3212890625,
+          "pass_at_4": 0.6484375,
+          "cap_hit_rate": 0.49609375,
+          "mean_tokens": 5087.3642578125,
+          "generated_tokens": 5209461,
+          "tokens_per_second": 20735.184582601825,
+          "local_update": 80,
+          "tier": "5x5_g8_i7",
+          "split": "harder",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_80/harder.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 320,
+          "pass_at_1": 0.3125,
+          "pass_at_4": 0.62109375,
+          "cap_hit_rate": 0.4931640625,
+          "mean_tokens": 5068.7802734375,
+          "generated_tokens": 5190431,
+          "tokens_per_second": 20631.54597923821,
+          "local_update": 100,
+          "tier": "5x5_g8_i7",
+          "split": "harder",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_100/harder.json"
+        }
+      ]
+    },
+    {
+      "id": "5x5_g6_i8",
+      "label": "Hardest",
+      "givens": 6,
+      "inequalities": 8,
+      "values": [
+        null,
+        null,
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 95,
+          "pass_at_1": 0.0927734375,
+          "pass_at_4": 0.265625,
+          "cap_hit_rate": 0.666015625,
+          "mean_tokens": 6750.52734375,
+          "generated_tokens": 6912540,
+          "tokens_per_second": 20321.036259489094,
+          "local_update": 0,
+          "tier": "5x5_g6_i8",
+          "split": "hardest",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_0/hardest.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 120,
+          "pass_at_1": 0.1171875,
+          "pass_at_4": 0.32421875,
+          "cap_hit_rate": 0.7177734375,
+          "mean_tokens": 6563.9736328125,
+          "generated_tokens": 6721509,
+          "tokens_per_second": 20222.30628607832,
+          "local_update": 80,
+          "tier": "5x5_g6_i8",
+          "split": "hardest",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_80/hardest.json"
+        },
+        {
+          "problems": 256,
+          "samples": 1024,
+          "correct_completions": 124,
+          "pass_at_1": 0.12109375,
+          "pass_at_4": 0.2890625,
+          "cap_hit_rate": 0.724609375,
+          "mean_tokens": 6637.7431640625,
+          "generated_tokens": 6797049,
+          "tokens_per_second": 20092.584737956597,
+          "local_update": 100,
+          "tier": "5x5_g6_i8",
+          "split": "hardest",
+          "source": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/eval/step_100/hardest.json"
+        }
+      ]
+    }
+  ],
+  "final_stage": {
+    "before": {
+      "pass_at_1": 0.37841796875,
+      "pass_at_4": 0.6298828125,
+      "cap_hit_rate": 0.400390625,
+      "mean_tokens": 4651.704833984375
+    },
+    "peak": {
+      "pass_at_1": 0.385009765625,
+      "pass_at_4": 0.6455078125,
+      "cap_hit_rate": 0.43505859375,
+      "mean_tokens": 4519.2275390625
+    },
+    "final": {
+      "pass_at_1": 0.370849609375,
+      "pass_at_4": 0.6142578125,
+      "cap_hit_rate": 0.45166015625,
+      "mean_tokens": 4633.7216796875
+    }
+  },
+  "stages": [
+    {
+      "stage": "tier_9_5",
+      "directory": "/mnt/d/SimplePT/runs/training/futoshiki5_g9i5_flash_mis_sc_async100_from_projection_sft_epoch2_20261017_v3",
+      "updates": 100,
+      "training_examples": 12800,
+      "wandb": {
+        "id": "mxzuua2w",
+        "url": "https://wandb.ai/lukas928/simple-pt/runs/mxzuua2w",
+        "project": "lukas928/simple-pt",
+        "mode": "online"
+      }
+    },
+    {
+      "stage": "tier_8_7",
+      "directory": "/mnt/d/SimplePT/runs/training/futoshiki5_g8i7_continue100_flash_mis_sc_async_from_g9_expert100_20261017",
+      "updates": 100,
+      "training_examples": 12800,
+      "wandb": {
+        "id": "1sqwl5up",
+        "url": "https://wandb.ai/lukas928/simple-pt/runs/1sqwl5up",
+        "project": "lukas928/simple-pt",
+        "mode": "online"
+      }
+    },
+    {
+      "stage": "tier_6_8",
+      "directory": "/mnt/d/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017",
+      "updates": 100,
+      "training_examples": 12800,
+      "wandb": {
+        "id": "uuwdywyl",
+        "url": "https://wandb.ai/lukas928/simple-pt/runs/uuwdywyl",
+        "project": "lukas928/simple-pt",
+        "mode": "online"
+      }
+    }
+  ],
+  "mixed_test": {
+    "before": {
+      "problems": 128,
+      "samples": 1024,
+      "mean_tokens": 4667.17578125,
+      "cap_hit_rate": 0.3974609375,
+      "correct_completions": 386,
+      "pass_at_1": 0.376953125,
+      "pass_at_4": 0.6056919642857143,
+      "pass_at_8": 0.703125,
+      "tier/5x5_g11_i5/correct_completions": 182,
+      "tier/5x5_g11_i5/pass_at_1": 0.7109375,
+      "tier/5x5_g11_i5/pass_at_4": 0.9419642857142857,
+      "tier/5x5_g11_i5/pass_at_8": 1.0,
+      "tier/5x5_g6_i8/correct_completions": 11,
+      "tier/5x5_g6_i8/pass_at_1": 0.04296875,
+      "tier/5x5_g6_i8/pass_at_4": 0.15401785714285715,
+      "tier/5x5_g6_i8/pass_at_8": 0.28125,
+      "tier/5x5_g8_i7/correct_completions": 82,
+      "tier/5x5_g8_i7/pass_at_1": 0.3203125,
+      "tier/5x5_g8_i7/pass_at_4": 0.634375,
+      "tier/5x5_g8_i7/pass_at_8": 0.75,
+      "tier/5x5_g9_i5/correct_completions": 111,
+      "tier/5x5_g9_i5/pass_at_1": 0.43359375,
+      "tier/5x5_g9_i5/pass_at_4": 0.6924107142857143,
+      "tier/5x5_g9_i5/pass_at_8": 0.78125
+    },
+    "final": {
+      "problems": 128,
+      "samples": 1024,
+      "mean_tokens": 4712.1240234375,
+      "cap_hit_rate": 0.4580078125,
+      "correct_completions": 377,
+      "pass_at_1": 0.3681640625,
+      "pass_at_4": 0.5795758928571428,
+      "pass_at_8": 0.671875,
+      "tier/5x5_g11_i5/correct_completions": 174,
+      "tier/5x5_g11_i5/pass_at_1": 0.6796875,
+      "tier/5x5_g11_i5/pass_at_4": 0.878125,
+      "tier/5x5_g11_i5/pass_at_8": 0.9375,
+      "tier/5x5_g6_i8/correct_completions": 14,
+      "tier/5x5_g6_i8/pass_at_1": 0.0546875,
+      "tier/5x5_g6_i8/pass_at_4": 0.17410714285714285,
+      "tier/5x5_g6_i8/pass_at_8": 0.25,
+      "tier/5x5_g8_i7/correct_completions": 93,
+      "tier/5x5_g8_i7/pass_at_1": 0.36328125,
+      "tier/5x5_g8_i7/pass_at_4": 0.6107142857142858,
+      "tier/5x5_g8_i7/pass_at_8": 0.71875,
+      "tier/5x5_g9_i5/correct_completions": 96,
+      "tier/5x5_g9_i5/pass_at_1": 0.375,
+      "tier/5x5_g9_i5/pass_at_4": 0.6553571428571429,
+      "tier/5x5_g9_i5/pass_at_8": 0.78125
+    },
+    "pass_at_1_gain_percentage_points": -0.87890625
+  }
+}

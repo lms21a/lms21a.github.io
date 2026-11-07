@@ -1,0 +1,28 @@
+<figure class="projection-process" data-projection-process>
+  <p class="process-kicker">Building the starting signal</p>
+  <p class="process-title">From a solver solution to a model-written example</p>
+  <ol>
+    <li><span class="step-number">01</span><h3>Solver solution</h3><p>An algorithmic solver provides a detailed worked solution.</p></li>
+    <li><span class="step-number">02</span><h3>Propose and refine</h3><p>The model writes a response, then makes ten refinements from random cut points. Keep verified answers with a better original-model score.</p></li>
+    <li><span class="step-number">03</span><h3>A supervised foothold</h3><p>Train on 256 selected examples for one SFT epoch, then return to RL.</p></li>
+  </ol>
+  <figcaption>The solver guides the proposal. The score is mean token log probability under the original model on the ordinary puzzle prompt. Verification checks the final assignment; intermediate prose is not certified.</figcaption>
+</figure>
+<style>
+  .projection-process { margin-block: 32px; padding-block: 24px; border-block: 1px solid var(--rule); }
+  .process-kicker { color: var(--green); font-size: 10px; font-weight: 600; line-height: 1.6; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 9px; }
+  .process-title { font-family: var(--serif); font-size: 28px; line-height: 1.2; font-weight: 550; margin: 0; }
+  .projection-process ol { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); list-style: none; padding: 0; margin: 24px 0; gap: 22px; }
+  .projection-process li { margin: 0; padding-top: 13px; border-top: 2px solid #a8b89f; }
+  .step-number { color: var(--green); font-family: ui-monospace, monospace; font-size: 11px; line-height: 1.6; }
+  .projection-process h3 { font-family: var(--serif); font-size: 22px; line-height: 1.2; font-weight: 550; margin: 10px 0; }
+  .projection-process li p { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 0; }
+  .projection-process figcaption { color: var(--muted); font-size: 11px; line-height: 1.7; text-align: left; margin: 0; }
+  @media (max-width: 620px) {
+    .process-title { font-size: 25px; }
+    .projection-process ol { grid-template-columns: minmax(0,1fr); gap: 18px; }
+    .projection-process li { padding-left: 15px; border-top: 0; border-left: 2px solid #a8b89f; padding-top: 0; }
+    .projection-process h3 { margin-block: 5px 8px; }
+    .projection-process li p { font-size: 14px; }
+  }
+</style>

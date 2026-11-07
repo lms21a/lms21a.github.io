@@ -1,0 +1,81 @@
+{
+  "sources": [
+    {
+      "path": "/mnt/d/SimplePT/runs/training/futoshiki_solverprojection256_epoch1_flashreinforce1000_b128_weighted8k_20261011/results/final_eval_report.md",
+      "sha256": "ae52b47c9e9baa8952eab6266af9e43a692b91af8df27e8c0e99c96ce88dd1ec",
+      "bytes": 3368
+    },
+    {
+      "path": "/home/lukas928/SimplePT/runs/training/futoshiki_solverprojection256_epoch1_flashreinforce1000_b128_weighted8k_20261011/results/full_panel.md",
+      "sha256": "e878c3c6b443286ad6b82e67df8e85103ab39d21d35a90962966543458d4a23c",
+      "bytes": 2488
+    },
+    {
+      "path": "/home/lukas928/SimplePT/runs/experiments/futoshiki_epochs_solver_projection_20261010/projection_summary.json",
+      "sha256": "4276cef5055aee41a62990240c7d9314f36801e83ed141d73e0865a9b0fffd63",
+      "bytes": 1305
+    }
+  ],
+  "evaluation_tokens": 8192,
+  "attempts_per_puzzle": 8,
+  "panels": [
+    {
+      "label": "Futoshiki 4×4",
+      "puzzles": 128,
+      "checkpoints": [
+        {
+          "update": 750,
+          "correct_completions": 585,
+          "completions": 1024,
+          "puzzles_solved": 115
+        },
+        {
+          "update": 1000,
+          "correct_completions": 793,
+          "completions": 1024,
+          "puzzles_solved": 119
+        }
+      ]
+    },
+    {
+      "label": "Futoshiki 5×5",
+      "puzzles": 32,
+      "checkpoints": [
+        {
+          "update": 750,
+          "correct_completions": 5,
+          "completions": 256,
+          "puzzles_solved": 2
+        },
+        {
+          "update": 1000,
+          "correct_completions": 13,
+          "completions": 256,
+          "puzzles_solved": 5
+        }
+      ]
+    }
+  ],
+  "training": {
+    "updates": 1000,
+    "batch": 128,
+    "distinct_prompts": 128000,
+    "first_750_token_cap": 4096,
+    "last_250_token_cap": 8192,
+    "last_250_tier_counts_per_batch": [
+      48,
+      48,
+      16,
+      16
+    ]
+  },
+  "projection": {
+    "examples": 256,
+    "epochs": 1,
+    "pass_at_1": 0.0419921875,
+    "pass_at_8": 0.21875,
+    "evaluation_tokens": 4096,
+    "puzzles": 128,
+    "attempts": 8
+  }
+}

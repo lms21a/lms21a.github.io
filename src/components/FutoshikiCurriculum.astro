@@ -1,0 +1,147 @@
+---
+import examples from '../data/futoshiki-intro.json';
+import fourByFour from '../data/futoshiki-4x4-example.json';
+
+const puzzles = [fourByFour.puzzle, examples.puzzles[0]];
+function promptExcerpt(prompt: string) {
+  const lines = prompt.split('\n');
+  const groups = lines.filter(line => line.includes('must be'));
+  const inequalities = lines.filter(line => /^- .+ < .+/.test(line));
+  return [
+    lines.find(line => line.startsWith('Unknown variables:')),
+    lines.find(line => line.startsWith('- Each unknown')),
+    '',
+    'Remaining-value constraints (excerpt):',
+    ...groups.slice(0, 2),
+    '…',
+    '',
+    'Inequalities (excerpt):',
+    ...inequalities.slice(0, 2),
+    '…',
+  ].join('\n');
+}
+const center = (index: number, size: number) => ({ x: 38 + (index % size) * 56, y: 38 + Math.floor(index / size) * 56 });
+function inequalityPath(a: number, b: number, size: number) {
+  const start = center(a, size), end = center(b, size);
+  const x = (start.x + end.x) / 2, y = (start.y + end.y) / 2;
+  if (start.y === end.y) {
+    const tip = start.x < end.x ? -4 : 4;
+    return `M ${x - tip} ${y - 5} L ${x + tip} ${y} L ${x - tip} ${y + 5}`;
+  }
+  const tip = start.y < end.y ? -4 : 4;
+  return `M ${x - 5} ${y - tip} L ${x} ${y + tip} L ${x + 5} ${y - tip}`;
+}
+---
+<figure class="futo-curriculum" data-futo-curriculum data-solution="false">
+  <div class="figure-intro">
+    <p class="figure-title">The puzzle and the model’s view</p>
+    <p>Two archived examples, with the same constraints shown in two ways.</p>
+  </div>
+  <div class="tier-controls" role="group" aria-label="Choose a Futoshiki example">
+    {puzzles.map((puzzle, index) => (
+      <button type="button" data-tier={index} aria-pressed={index === 0 ? 'true' : 'false'} aria-controls={`futo-panel-${index}`}>
+        <span>{puzzle.size}×{puzzle.size} example</span>
+        <small>{Object.keys(puzzle.givens).length} givens · {puzzle.inequalities.length} inequalities</small>
+      </button>
+    ))}
+  </div>
+  {puzzles.map((puzzle, index) => (
+    <div class="puzzle-panel" id={`futo-panel-${index}`} data-tier-panel={index} hidden={index !== 0}>
+      <div class="puzzle-body">
+        <svg class="puzzle-grid" viewBox={`0 0 ${puzzle.size * 56 + 20} ${puzzle.size * 56 + 20}`} role="img" aria-labelledby={`futo-title-${index} futo-description-${index}`}>
+          <title id={`futo-title-${index}`}>{puzzle.size}×{puzzle.size} Futoshiki example</title>
+          <desc id={`futo-description-${index}`}>An archived puzzle with {Object.keys(puzzle.givens).length} fixed numbers and {puzzle.inequalities.length} inequalities. Letters identify the unknown cells in the model input.</desc>
+          {puzzle.solution.map((value, cell) => {
+            const point = center(cell, puzzle.size);
+            const given = (puzzle.givens as Record<string, number | undefined>)[String(cell)];
+            return <g>
+              <rect x={point.x - 22} y={point.y - 22} width="44" height="44" rx="3" />
+              {given !== undefined ? <text class="given-digit" x={point.x} y={point.y + 8}>{given}</text> : <>
+                <text class="cell-letter" x={point.x - 16} y={point.y - 10}>{String.fromCharCode(65 + cell)}</text>
+                <text class="solution-digit" x={point.x} y={point.y + 8}>{value}</text>
+              </>}
+            </g>;
+          })}
+          {puzzle.inequalities.map(([a, b]) => <path class="inequality" d={inequalityPath(a, b, puzzle.size)} />)}
+        </svg>
+        <div class="puzzle-explanation">
+          <p>Fill each row and column with the numbers 1–{puzzle.size}, once each. The pointed end of an inequality faces the smaller number.</p>
+          <p>Dark numbers are given. Letters mark the unknowns in the model’s prompt.</p>
+          <button type="button" class="solution-toggle" data-solution-toggle aria-pressed="false">Show verified solution</button>
+          <p class="solution-status" data-solution-status aria-live="polite">Solution hidden.</p>
+        </div>
+      </div>
+      <div class="model-input">
+        <p class="input-label">What the model sees · excerpt</p>
+        <pre>{promptExcerpt(puzzle.prompt)}</pre>
+      </div>
+    </div>
+  ))}
+  <figcaption>The grid is drawn for the reader. The model receives text constraints over the lettered unknowns, with fixed values already substituted. Ellipses omit further constraints and instructions.</figcaption>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-futo-curriculum]').forEach(figure => {
+    const controls = figure.querySelectorAll<HTMLButtonElement>('[data-tier]');
+    const panels = figure.querySelectorAll<HTMLElement>('[data-tier-panel]');
+    function reveal(show: boolean) {
+      figure.dataset.solution = String(show);
+      figure.querySelectorAll<HTMLButtonElement>('[data-solution-toggle]').forEach(button => {
+        button.setAttribute('aria-pressed', String(show));
+        button.textContent = show ? 'Hide solution' : 'Show verified solution';
+      });
+      figure.querySelectorAll<HTMLElement>('[data-solution-status]').forEach(status => {
+        status.textContent = show ? 'Green numbers show the verified solution.' : 'Solution hidden.';
+      });
+    }
+    controls.forEach(button => button.addEventListener('click', () => {
+      const tier = button.dataset.tier;
+      controls.forEach(control => control.setAttribute('aria-pressed', String(control === button)));
+      panels.forEach(panel => { panel.hidden = panel.dataset.tierPanel !== tier; });
+      reveal(false);
+    }));
+    figure.querySelectorAll<HTMLButtonElement>('[data-solution-toggle]').forEach(button => {
+      button.addEventListener('click', () => reveal(figure.dataset.solution !== 'true'));
+    });
+  });
+</script>
+
+<style>
+  .futo-curriculum { border-block: 1px solid var(--rule); margin-block: 34px; padding-block: 24px; }
+  .figure-intro p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted); }
+  .figure-intro .figure-title { color: var(--ink); font-family: var(--serif); font-size: 28px; font-weight: 550; line-height: 1.2; margin-bottom: 7px; }
+  .tier-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-block: 20px 25px; }
+  .tier-controls button { appearance: none; text-align: left; border: 1px solid var(--rule); border-radius: 3px; background: transparent; color: var(--muted); font-family: var(--sans); padding: 10px; cursor: pointer; line-height: 1.5; }
+  .tier-controls button[aria-pressed='true'] { border-color: var(--green); color: var(--green); background: #edf0e7; }
+  .tier-controls span { display: block; font-size: 15px; font-weight: 600; }
+  .tier-controls small { display: block; font-size: 11px; line-height: 1.5; margin-top: 4px; }
+  .tier-controls button:focus-visible, .solution-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .puzzle-body { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 26px; align-items: center; }
+  .puzzle-grid { width: 100%; max-width: 300px; height: auto; display: block; }
+  .puzzle-grid rect { fill: transparent; stroke: #b9c5b7; stroke-width: 1; }
+  .puzzle-grid text { font-family: var(--sans); text-anchor: middle; font-size: 22px; fill: var(--ink); }
+  .puzzle-grid .given-digit { font-weight: 600; }
+  .puzzle-grid .cell-letter { font-size: 9px; text-anchor: start; fill: var(--muted); }
+  .puzzle-grid .solution-digit { fill: var(--green); opacity: 0; transition: opacity 150ms ease; }
+  .futo-curriculum[data-solution='true'] .solution-digit { opacity: 1; }
+  .inequality { fill: none; stroke: var(--green); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .puzzle-explanation p { margin: 0 0 13px; font-size: 15px; line-height: 1.6; }
+  .puzzle-explanation p + p { color: var(--muted); font-size: 13px; }
+  .solution-toggle { font-family: var(--sans); font-size: 13px; padding: 9px 12px; color: var(--green); border: 1px solid var(--green); border-radius: 3px; cursor: pointer; background: transparent; line-height: 1.5; }
+  .puzzle-explanation .solution-status { font-size: 11px; line-height: 1.5; color: var(--muted); margin-top: 10px; }
+  .model-input { margin-top: 20px; }
+  .input-label { color: var(--green); font-size: 11px; line-height: 1.6; letter-spacing: .05em; text-transform: uppercase; margin: 0; }
+  .model-input pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.7; margin-top: 10px; padding: 16px; }
+  .futo-curriculum figcaption { font-size: 12px; line-height: 1.6; text-align: left; margin-top: 20px; color: var(--muted); }
+  [hidden] { display: none !important; }
+  @media (max-width: 620px) {
+    .tier-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .tier-controls small { font-size: 12px; }
+    .puzzle-body { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .puzzle-grid { max-width: 280px; margin-inline: auto; }
+    .solution-toggle { min-height: 44px; font-size: 14px; }
+    .puzzle-explanation p { font-size: 15px; }
+    .figure-intro .figure-title { font-size: 25px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .solution-digit { transition: none; } }
+</style>

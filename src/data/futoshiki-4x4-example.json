@@ -1,0 +1,62 @@
+{
+  "source": {
+    "path": "/home/lukas928/SimplePT/runs/training/futoshiki_solverprojection256_epoch1_flashreinforce1000_b128_weighted8k_20261011/full_panel/data/futoshiki4.jsonl",
+    "line": 1,
+    "file_sha256": "19d4442cabdbeed4efd59be0cd6802337707cd5c71ddd744d9a6176e9dd50d98",
+    "record_sha256": "a9353a31b5fc5f586ae79008432903701e4220594215ed790d1bf30164ca55df"
+  },
+  "puzzle": {
+    "id": "5445f244833c1516cfe30ad3e0a4e22db95390221b78329b30bdee4220a05c24",
+    "size": 4,
+    "givens": {
+      "1": 4,
+      "5": 2,
+      "7": 1,
+      "15": 2
+    },
+    "inequalities": [
+      [
+        9,
+        13
+      ],
+      [
+        14,
+        13
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        10,
+        6
+      ],
+      [
+        7,
+        6
+      ]
+    ],
+    "solution": [
+      1,
+      4,
+      2,
+      3,
+      3,
+      2,
+      4,
+      1,
+      2,
+      1,
+      3,
+      4,
+      4,
+      3,
+      1,
+      2
+    ],
+    "prompt": "Solve this number-constraint puzzle.\n\nUnknown variables: A, C, D, E, G, I, J, K, L, M, N, O.\n\nRules:\n- Each unknown is an integer from 1 to 4.\n- Satisfy every remaining-value constraint below.\n- A variable has the same value wherever it appears.\n- Numbers may be reused in different groups; within a listed group each listed number appears exactly once.\n\nRemaining-value constraints (fixed values have already been removed):\n- A, C, D must be 1, 2, 3, in some order (each listed number exactly once).\n- E, G must be 3, 4, in some order (each listed number exactly once).\n- I, J, K, L must be 1, 2, 3, 4, in some order (each listed number exactly once).\n- M, N, O must be 1, 3, 4, in some order (each listed number exactly once).\n- A, E, I, M must be 1, 2, 3, 4, in some order (each listed number exactly once).\n- J, N must be 1, 3, in some order (each listed number exactly once).\n- C, G, K, O must be 1, 2, 3, 4, in some order (each listed number exactly once).\n- D, L must be 3, 4, in some order (each listed number exactly once).\n\nInequalities (fixed values have already been substituted):\n- J < N\n- O < N\n- A < E\n- K < G\n- 1 < G\n\nThe puzzle has exactly one solution. Reason through the constraints and check your assignment.\nFinish your reasoning with </thinking>, then give the unknown values inside <answer> and </answer>.\nWrite one NAME=number assignment for each unknown, in the order listed above. Separate assignments with spaces.\nOnly output the unknowns. Fixed values are supplied by the environment.",
+    "solutions_without_inequalities": 6,
+    "solution_count": 1,
+    "tier": "4x4_g4_i5"
+  }
+}

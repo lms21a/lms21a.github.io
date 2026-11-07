@@ -1,0 +1,121 @@
+{
+  "puzzles": 128,
+  "samples": 1024,
+  "samples_per_puzzle": 8,
+  "correct_completions": 893,
+  "solved_puzzles": 126,
+  "pass_at_1": 0.8720703125,
+  "pass_at_4": 0.9677455357142857,
+  "pass_at_8": 0.984375,
+  "mean_tokens": 1368.5068359375,
+  "cap_hits": 73,
+  "by_tier": {
+    "4x4_g4_i5": {
+      "puzzles": 32,
+      "samples": 256,
+      "samples_per_puzzle": 8,
+      "correct_completions": 197,
+      "solved_puzzles": 30,
+      "pass_at_1": 0.76953125,
+      "pass_at_4": 0.9058035714285715,
+      "pass_at_8": 0.9375,
+      "mean_tokens": 2407.0546875,
+      "cap_hits": 44,
+      "strict_format_valid": 0.80859375,
+      "solution_correct": 0.76953125
+    },
+    "4x4_g5_i4": {
+      "puzzles": 32,
+      "samples": 256,
+      "samples_per_puzzle": 8,
+      "correct_completions": 214,
+      "solved_puzzles": 32,
+      "pass_at_1": 0.8359375,
+      "pass_at_4": 0.9785714285714285,
+      "pass_at_8": 1.0,
+      "mean_tokens": 1486.15625,
+      "cap_hits": 21,
+      "strict_format_valid": 0.8984375,
+      "solution_correct": 0.83984375
+    },
+    "4x4_g6_i3": {
+      "puzzles": 32,
+      "samples": 256,
+      "samples_per_puzzle": 8,
+      "correct_completions": 235,
+      "solved_puzzles": 32,
+      "pass_at_1": 0.91796875,
+      "pass_at_4": 0.9866071428571429,
+      "pass_at_8": 1.0,
+      "mean_tokens": 968.390625,
+      "cap_hits": 7,
+      "strict_format_valid": 0.97265625,
+      "solution_correct": 0.91796875
+    },
+    "4x4_g7_i3": {
+      "puzzles": 32,
+      "samples": 256,
+      "samples_per_puzzle": 8,
+      "correct_completions": 247,
+      "solved_puzzles": 32,
+      "pass_at_1": 0.96484375,
+      "pass_at_4": 1.0,
+      "pass_at_8": 1.0,
+      "mean_tokens": 612.42578125,
+      "cap_hits": 1,
+      "strict_format_valid": 0.99609375,
+      "solution_correct": 0.96484375
+    }
+  },
+  "evaluated_on": "2026-11-06",
+  "checkpoint": "/home/lukas928/SimplePT/runs/training/futoshiki5_g6i8_continue100_flash_mis_sc_async_from_g8_expert100_20261017/checkpoints/step_100/policy",
+  "cumulative_update": 300,
+  "max_tokens": 8192,
+  "temperature": 1.0,
+  "evaluation_seed": 20261106,
+  "dataset": {
+    "source": "/home/lukas928/SimplePT/runs/training/futoshiki_continuation512_flashreinforce500_b128_20261010/data/test.jsonl",
+    "sha256": "19d4442cabdbeed4efd59be0cd6802337707cd5c71ddd744d9a6176e9dd50d98",
+    "puzzles": 128,
+    "tiers": {
+      "4x4_g4_i5": 32,
+      "4x4_g5_i4": 32,
+      "4x4_g6_i3": 32,
+      "4x4_g7_i3": 32
+    },
+    "max_prompt_tokens": 453
+  },
+  "baseline": {
+    "checkpoint": "4×4 RL update 1000",
+    "puzzles": 128,
+    "samples": 1024,
+    "correct_completions": 793,
+    "solved_puzzles": 119,
+    "pass_at_1": 0.7744140625,
+    "pass_at_8": 0.9296875,
+    "max_tokens": 8192
+  },
+  "same_test_panel": true,
+  "source_hashes": {
+    "/home/lukas928/SimplePT/runs/evaluations/futoshiki5_expert300_on_4x4_20261106/summary.json": {
+      "bytes": 5608,
+      "sha256": "40b3de1ad5db25dc7c3eae8f9e415424f18317093ae87f45e303f180fa143e1c"
+    },
+    "/home/lukas928/SimplePT/runs/evaluations/futoshiki5_expert300_on_4x4_20261106/protocol.json": {
+      "bytes": 28694,
+      "sha256": "0487b6d9fd3904d792cb086134ab269df765a34091c571b54934b7b15617c22a"
+    },
+    "/home/lukas928/SimplePT/runs/evaluations/futoshiki5_expert300_on_4x4_20261106/verification.json": {
+      "bytes": 1491,
+      "sha256": "289b5a97fe99fd4490b97e6fc6f69e2bdeb43b8ec3e984abfe6335cca50774d3"
+    },
+    "/home/lukas928/SimplePT/runs/evaluations/futoshiki5_expert300_on_4x4_20261106/checkpoint_selection.json": {
+      "bytes": 660,
+      "sha256": "cc167ea77b81ab675b4575aeb4d32d93f44194ae79f12b9707b24fe3f4fce5b9"
+    },
+    "/home/lukas928/SimplePT/runs/evaluations/futoshiki5_expert300_on_4x4_20261106/report.md": {
+      "bytes": 4876,
+      "sha256": "6ea6f340c119fb94a767a4b457d2aa72642fd62bfa571d304381be98f628cf1e"
+    }
+  }
+}

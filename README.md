@@ -2,7 +2,7 @@
 
 Lukas Slifierz’s research blog, built with [Astro](https://astro.build) for GitHub Pages.
 
-**Current state: private repository; GitHub Pages is not enabled.** The workflow checks every push but cannot deploy unless the repository variable `PAGES_ENABLED` is explicitly set to `true`.
+**Public site: [lms21a.github.io](https://lms21a.github.io/).** GitHub Actions builds and deploys ready posts when the repository variable `PAGES_ENABLED` is set to `true`.
 
 ## Start writing
 
@@ -16,7 +16,7 @@ npm run dev:drafts
 
 Open the local address printed in your terminal. New posts are created in `src/content/posts/` with `draft: true`. The draft preview shows unpublished posts and a notice; draft pages are excluded from every production build, even if it is built with `--mode drafts`.
 
-There is a complete unpublished example in [`src/content/posts/research-note-template.mdx`](src/content/posts/research-note-template.mdx). The introductory post is starter copy; edit or delete it before launch.
+There is a complete unpublished example in [`src/content/posts/research-note-template.mdx`](src/content/posts/research-note-template.mdx). The introductory starter post also remains a draft.
 
 To preview only ready posts, use `npm run dev`. To view exactly what would be deployed, use `npm run build` followed by `npm run preview`.
 
@@ -67,15 +67,13 @@ npm run verify
 
 Verification checks that draft and future posts have no generated pages or entries in the homepage, RSS feed, or sitemap. It also checks the generated pages for broken local links and asset references. GitHub Actions runs the same checks on pushes and pull requests.
 
-## Publish later
+## Publishing
 
-Nothing below has been enabled yet. Publication is a separate, deliberate step.
-
-1. Review the starter copy and every post marked `draft: false`.
+1. Review every post marked `draft: false`.
 2. In this repository’s **Settings → Pages**, choose **GitHub Actions** as the build source. GitHub Free requires a public repository for Pages; a supported paid plan can publish from a private repository. Keep the repository private unless you decide otherwise.
 3. In **Settings → Secrets and variables → Actions → Variables**, create the repository variable `PAGES_ENABLED` with value `true`.
 4. Run **Actions → Check blog and optionally publish → Run workflow**, or push to `main`.
 
-The intended address is `https://lms21a.github.io/`. It is not a deployed site yet. Once enabled, ready posts deploy on pushes to `main`; pull requests only run checks. Setting `PAGES_ENABLED` back to `false` stops subsequent deployments but does not remove a site already published; disable Pages in Settings to take a live site down.
+The site address is `https://lms21a.github.io/`. Ready posts deploy on pushes to `main`; pull requests only run checks. Setting `PAGES_ENABLED` back to `false` stops subsequent deployments but does not remove a site already published; disable Pages in Settings to take a live site down.
 
 [GitHub Pages documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site) explains that a site can be publicly accessible even when its source repository is private.

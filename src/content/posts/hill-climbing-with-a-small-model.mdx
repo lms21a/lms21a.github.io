@@ -1,0 +1,213 @@
+---
+title: "Hill climbing with a 1.2B language model"
+description: "An experiment using curriculum learning to train a small language model on Futoshiki puzzles."
+date: 2026-11-05
+draft: false
+tags: [Research, Reinforcement learning]
+---
+
+import FutoshikiCurriculum from '../../components/FutoshikiCurriculum.astro';
+import BenchmarkJourney from '../../components/BenchmarkJourney.astro';
+import CountdownTrace from '../../components/CountdownTrace.astro';
+import arithmeticArt from '../../assets/journey/chapter-01.png';
+import AlgorithmComparison from '../../components/AlgorithmComparison.astro';
+import ProjectionProcess from '../../components/ProjectionProcess.astro';
+import SolverProjectionComparison from '../../components/SolverProjectionComparison.astro';
+import FutoshikiClimb from '../../components/FutoshikiClimb.astro';
+import FutoshikiTrainingCurve from '../../components/FutoshikiTrainingCurve.astro';
+import FutoshikiRegression from '../../components/FutoshikiRegression.astro';
+import SpecialistRestart from '../../components/SpecialistRestart.astro';
+import CurriculumResults from '../../components/CurriculumResults.astro';
+import FutoshikiTraces from '../../components/FutoshikiTraces.astro';
+import FutoshikiReasoningComparison from '../../components/FutoshikiReasoningComparison.astro';
+import climbingArt from '../../assets/journey/chapter-04.png';
+import curriculumArt from '../../assets/journey/chapter-05.png';
+
+Recently, I've been thinking about whether reinforcement learning can teach a language model something new, or whether it just brings out abilities already present in pretraining. Intuitively, I'd expect RL to be able to teach novel abilities: it updates the model's parameters through gradients, just as other forms of training do. [Yue and colleagues](https://arxiv.org/abs/2504.13837) and [Liu and colleagues](https://arxiv.org/abs/2505.24864) report different findings in their respective settings. I wanted to explore the question myself on my own hardware, using a small model and an easily verifiable reasoning task. This hill climb is a stepping stone to exploring that broader question.
+
+<BenchmarkJourney chapter="instruct" />
+
+## Setup
+
+I wanted to approach this through curriculum learning: basically putting the model through school.[^curriculum] The idea was to build a foothold on simpler puzzles and see how far I could take it. I started with [LFM2.5-1.2B-Instruct](https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct), and the main idea was to avoid using a stronger outside language model as a teacher in these experiments. Algorithmic solvers, verifiers, and the model itself could provide supervision, but I didn't want the reasoning to come from a stronger model.
+
+I ran these experiments locally on a single RTX 4090 with 24 GB of VRAM. I designed the curriculum and adapted solver-generated solutions using projection sampling. I also implemented the training and evaluation pipeline and the native inference optimizations, building on the released model and the methods cited below.
+
+The training code for this climb is available in [climbing-gym](https://github.com/lms21a/climbing-gym/tree/main).
+
+My goal was to see how far this model could get on 5×5 Futoshiki, without setting a target score in advance. Even after the arithmetic preparation described below, it solved none of the 5×5 puzzles in its initial evaluation. I wanted to start climbing the curriculum and see what happened.
+
+### The task
+
+A Futoshiki puzzle can be displayed as a partially filled grid with inequalities between neighboring cells. The model receives a textual representation: groups of remaining values and inequalities over named unknowns. Its job is to fill the remaining cells while respecting the clues, inequalities, and the rule that each number appears once in every row and column. The examples below show the game state and an excerpt of what the model sees.
+
+<FutoshikiCurriculum />
+
+A successful answer assigns every unknown cell so that the completed puzzle satisfies all the constraints; the environment restores the fixed cells. The model reasons inside `<thinking>` tags and gives its answer inside `<answer>` tags, a familiar format for reasoning models. A correct assignment in the required format earns a reward of one; anything else earns zero. The verifier checks the final assignment and format, not the intermediate reasoning, and there is no process reward model.
+
+I report pass@1, pass@4, and pass@8 to describe how often the model solves puzzles with different numbers of attempts. Pass@1 is the chance that a single attempt is correct; pass@4 and pass@8 measure the fraction of puzzles solved at least once within four or eight attempts. More attempts give the model more chances to find a solution and reveal its coverage: the fraction of evaluated puzzles it can solve within that attempt budget. These scores should therefore be compared at the same attempt budget.
+
+### Preparing the model
+
+I built my own thinking checkpoint by applying rule-verified RL to the released Instruct model, first on GSM8K and then on Countdown. I chose Instruct rather than the Thinking model because I wanted to develop this reasoning post-training myself; Liquid says the Thinking model was trained with [synthetic reasoning traces](https://www.liquid.ai/blog/lfm2-5-1-2b-thinking-on-device-reasoning-under-1gb). The approach took inspiration from [DeepSeek-R1-Zero](https://arxiv.org/abs/2501.12948v1), with a different starting model and recipe. This was post-training of an existing model, not pretraining from random weights. The arithmetic details and a selected Countdown response are in the [appendix](#appendix-the-arithmetic-checkpoint).
+
+<BenchmarkJourney chapter="post-countdown" illustration={arithmeticArt} />
+
+## A foothold on 4×4
+
+The first Futoshiki evaluation showed how little room the model had to work with. The post-Countdown checkpoint produced just one strict success in 1,024 attempts on 4×4 puzzles. With so few successful responses to reinforce, I needed a foothold before the climb could really begin.[^countdown-transfer]
+
+To get a stronger starting signal, I turned to an idea from [Finetuning with Sampling: SFT Learns Better Than You Think](https://arxiv.org/abs/2610.02140): projection sampling, which uses the learner's own distribution to help shape supervised examples. My idea was to apply it to algorithmic solver traces, adapting those solutions into demonstrations that were more likely under the model. That was what excited me: I could try to bridge the gap between a solver's demonstrations and the model's own responses without using a stronger language model as a teacher.
+
+That motivation has something in common with [on-policy distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) (OPD) and [multi-teacher on-policy distillation](https://www.appliedcompute.com/research/multi-teacher-on-policy-distillation) (MOPD), where teachers supply token probabilities for learner-generated rollouts. A saved solver trace alone cannot provide those probabilities. Here, I instead tried to bring the solver's targets closer to the learner before supervised fine-tuning (SFT): the solver supplied detailed solutions and the model proposed and refined their wording. It made one full proposal, then ten refinements from random cut points; I kept refinements with higher mean token log probability under the original model and verified the final answers.
+
+<ProjectionProcess />
+
+My first solver-grounded SFT run produced better task scores, but its responses felt mechanical to me: I thought the natural chain-of-thought style had been lost. I wanted enough successful answers to start RL while using as little supervised data as I could, so I inspected the generated responses and chose the projected approach for its more exploratory style. A conversational response isn't necessarily sound reasoning; the projected example below reaches a correct final answer despite intermediate mistakes.
+
+I selected 256 projected examples and trained for one SFT epoch. On a panel of 128 puzzles with eight attempts each and a 4,096-token limit, the resulting model reached 4.20% pass@1 and 21.88% pass@8. The separate solver-grounded run used fixed solver steps with short model-written rule paraphrases and reached 26.76% pass@1 and 74.22% pass@8 on the same panel. It used 512 examples and four epochs, compared with 256 examples and one epoch for the selected projected model, so the endpoints don't establish which learned faster.
+
+<SolverProjectionComparison />
+
+## Climbing 4×4
+
+With the projected checkpoint as our next base camp, it was time to start the climb. After some early testing, I chose FlashREINFORCE and used the [paper's hyperparameters](https://yifanzhang-pro.github.io/FlashREINFORCE/FlashREINFORCE.pdf) as a starting point, including a batch size of 128. For this initial climb, I wanted to try the simplest approach: start with a balanced mix of 4×4 puzzles and train for 1,000 updates.
+
+<AlgorithmComparison />
+
+After 750 updates, the model reached 57.13% pass@1 on a test of 128 puzzles with eight attempts each, evaluated with an 8,192-token limit. Training up to that point had used a 4,096-token cap.
+
+The harder tiers were hitting that training limit more often than the easier ones. For the final 250 updates, I doubled the cap to 8,192 tokens to give them more breathing room. I also increased the share of harder tiers in the training mix. On the same test, the final model reached 77.44% pass@1 and 92.97% pass@8, solving 119 of the 128 puzzles within eight attempts.
+
+The same model scored 5.08% pass@1 and 15.63% pass@8 on 5×5, using 32 puzzles with eight attempts each and an 8,192-token limit.
+
+So far, so smooth.
+
+<FutoshikiTrainingCurve />
+
+<FutoshikiClimb />
+
+<BenchmarkJourney chapter="rl1000" illustration={climbingArt} />
+
+## The first 5×5 continuation
+
+With 4×4 pass@8 at about 93%, I felt ready to move to 5×5. Even without 5×5-specific training, the model had enough initial successes that I thought RL would have a useful signal. Keeping the same idea of simplicity, I launched a run on a balanced mix of 5×5 puzzles, treating the move from 4×4 to 5×5 as a natural curriculum. However, things didn’t go as planned.
+
+<FutoshikiRegression />
+
+The degradation surprised me. I considered whether a mismatch between training and inference could be contributing; this run came before I adopted the [“score centering”](https://arxiv.org/abs/2609.20807) correction for that kind of mismatch. I also wondered whether the weak initial 5×5 foothold left too few useful successes to provide a stable learning signal. [ProRL](https://arxiv.org/abs/2505.24864) discusses the difficulty of maintaining exploration and stability during RL. I don't know the exact cause here.[^regression-investigation]
+
+Regardless, I still felt the model had room to grow. Futoshiki supplies its rules in the task, so my intuition was that the challenge lay more in applying them consistently through reasoning and search than in missing domain knowledge. I wasn't ready to give up on the climb.
+
+## Restarting with specialists
+
+The first thing I reached for after the decline was SFT/distillation as a way to continue the climb. [MAI-Thinking-1](https://microsoft.ai/pdf/mai-thinking-1.pdf#page=34) describes collecting its own RL rollouts and using SFT on a mid-trained checkpoint to start a new climb while preserving previous gains, including when recovering from collapses or numerical drift. More recently, [RL Starts before RL](https://arxiv.org/abs/2609.28145) reported stronger results from on-policy distillation followed by RL than from direct RL or SFT followed by RL in its tested settings. That made the idea interesting to me, though my experiment used a different method.
+
+Even though the 350-update run regressed overall, its performance was uneven across the difficulty tiers. The model did better on puzzles with more givens than on the tiers that relied more on inequalities. My intuition was that working through inequalities required more steps of deduction. I evaluated the model on tiers with different numbers of givens and inequalities and identified two easier starting points: 11 givens with 5 inequalities, and 9 givens with 5 inequalities.
+
+Rather than use on-policy distillation or train directly on teacher traces, I returned to projection sampling. I used the 4×4 update-1,000 checkpoint from before the 5×5 RL warmup as the student. The two easier tiers became the targets for two 5×5 specialists within my own model lineage, trained with RL and the same binary correctness reward. These were shorter, targeted runs intended to lift the model's 5×5 performance. Their verified solutions became projected targets for SFT, giving the student a new foothold before another RL run. The process and specialist results are below.
+
+<SpecialistRestart />
+
+On the two SFT development tiers, the retained student reached 36.04% and 11.33% pass@1, compared with the specialists' 49.22% and 18.75%. Each tier used 256 puzzles, four attempts per puzzle, and an 8,192-token limit. The student did not match the specialists, but the restart gave me a new place to continue the 5×5 curriculum. Before RL, I re-evaluated the same student with the rollout engine used for the curriculum; those fresh measurements are the table's starting point, with no training in between.
+
+## Climbing the 5×5 curriculum
+
+After seeing the specialists improve on their individual tiers, my plan was to continue training an expert for each difficulty and then consolidate them into the student. I was inspired by [Applied Compute's Spork](https://www.appliedcompute.com/research/multi-teacher-on-policy-distillation): a short RL warmup, separate experts, and distillation back into a student, outperforming its full-dataset RL baselines in math and chess. But as I trained one checkpoint through the curriculum, I saw something I hadn't expected: in the first two stages, performance improved on the earlier measured tiers as well. That made me want to keep carrying the same student forward.[^specialist-context]
+
+I continued training the same student for 100 updates on each tier before increasing the difficulty. I started with 9 givens and 5 inequalities; as that tier improved, pass@1 on the easiest tier also rose from 35.55% to 58.50%, even though that tier wasn't part of this RL stage.
+
+I then trained on 8 givens and 7 inequalities, where the target and both earlier measured tiers improved. Finally, I moved to the hardest tier, with 6 givens and 8 inequalities. That tier and the next-hardest tier both improved, and the model could solve some of the hardest puzzles.
+
+<CurriculumResults />
+
+On the final tier, with 6 givens and 8 inequalities, pass@1 rose from 9.28% to 12.11%. I had originally planned to train an expert on each tier, so finishing the last stage felt like a natural stopping point for this run. I still think the model has plenty of room to grow.
+
+## So What Did the Model Learn?
+
+I started this climb with a model that managed one correct 4×4 response in 1,024 attempts and no 5×5 successes in its initial evaluation after arithmetic training. By the end, it had made substantial gains on the easier 5×5 tiers and could solve some of the hardest puzzles. The first failed 5×5 continuation wasn't necessarily the model's ceiling: a new foothold and a different sequence of training took it further. On a separate mixed-tier test of 128 5×5 puzzles, the final student reached 36.82% pass@1 and 67.19% pass@8.
+
+After the 5×5 curriculum, I evaluated the final student on 4×4 again. It reached 87.21% pass@1 and 98.44% pass@8, up from 77.44% and 92.97% at the earlier 4×4 checkpoint, even though the 5×5 training used no 4×4 examples. For me, that reinforced what I'd seen between the 5×5 tiers: training on harder puzzles could also improve performance on an earlier, easier task.
+
+In the traces I read, the reasoning looked more consistent: more direct use of constraints, fewer repeated trial assignments, and more useful checks before the final answer. One comparison shows the same 11-given puzzle at the projected starting point and after the curriculum. The earlier response cycles through conflicting assignments and ends incorrectly; the later one assigns values more directly, checks its groups, and reaches a correct answer.
+
+<FutoshikiReasoningComparison />
+
+On the fixed easier validation panels, responses also became shorter on average. On the 11-given tier, mean length fell from about 4,503 tokens at the projected starting point to 2,485 at the end; on the 9-given tier, it fell from about 6,325 to 4,344. The [appendix](#appendix-selected-futoshiki-traces) has the full comparison and more selected responses.
+
+Looking back, Futoshiki gave me a useful place to experiment. I could check answers exactly, adjust the difficulty, and build a curriculum with a manageable next step. Those conditions made it possible to keep finding footholds when a run stalled.
+
+But not every problem gives you a clear next step. What do you do when the model plateaus and you can't build a slightly harder task for it to climb? That's the question I want to explore in the next post.
+
+<BenchmarkJourney chapter="curriculum" illustration={curriculumArt} />
+
+## Appendix: The arithmetic checkpoint
+
+I started with GSM8K, where the model already had some ability, using FlashREINFORCE with a batch size of 128 and a learning rate of 1e-6. A response earned a reward of one only if its numeric answer was correct and its thinking and answer tags were valid. The run stopped after 16 updates, and I retained update 10. On a fixed 256-question test subset, numeric accuracy rose from 51.95% to 77.34%; the rate satisfying both correctness and formatting rose from 26.17% to 75.39%. Even with that improvement, I wasn't satisfied with the consistency of the reasoning I was reading in the responses.
+
+I moved to Countdown to explore whether practicing search would encourage more consistent self-checking. The model must reach a target using each given number exactly once, with addition, subtraction, multiplication, and division. Intermediate results must be positive integers, and division must be exact. In this selected response, the model tries candidates, notices misses, and then checks the expression that reaches the target.
+
+<CountdownTrace />
+
+I trained first on three-number puzzles for 13 updates, then on four-number puzzles for 50 updates, followed by another 50-update FlashREINFORCE continuation. On a separate untouched panel of 256 Countdown puzzles, that final checkpoint reached 35.1% pass@1 and 63.7% pass@8, with eight attempts per puzzle and a 4,096-token window.
+
+## Appendix: Is there a reasoning ceiling?
+
+One question I keep coming back to is whether a model's size sets a limit on its reasoning ability for tasks that require little outside knowledge. My intuition is that we can push reasoning on these tasks much further than current training plateaus suggest.
+
+For math or coding, a plateau might also reflect knowledge the model hasn't learned or can't reliably access. [Paradigma's math-focused 1B Limite–Violetto](https://paradigma.inc/blog/limite-1b-violetto/), which reports strong mathematical performance despite its small size, is one example that made me take domain specialization seriously.
+
+Futoshiki gives me a different place to explore the question: the rules are supplied in the prompt, even if applying them consistently is difficult. Knowledge and reasoning aren't completely separable, but the puzzle lets me focus on how the model works with a small set of explicit constraints.
+
+This is a question I hope to explore in future blog posts.
+
+## Appendix: Investigating the regression
+
+Fresh native reloads reproduced the stored monitor responses, so the decline wasn't simply an artifact of stale inference-engine state.
+
+I also checked the negative credit term: the part of the update that penalizes failed responses. In a replay of update 251 using the same checkpoint, optimizer state, rollout batch, and evaluation seeds, removing that term improved the monitor outcome. This implicated the term in that particular update without explaining the whole decline or establishing a lasting fix.
+
+Collection and learning alternated on one GPU, so policy lag was zero. That means rollouts used the current policy; it doesn't guarantee that the sampling and training implementations produced numerically identical probabilities. Training–inference mismatch remained a possibility.
+
+## Appendix: Making the climb faster
+
+Collecting enough responses on one GPU was an important part of making this experiment practical. I used lower precision selectively in the rollout engine: FP8 for the MLP and KV cache, and later the output head. The learner trained in BF16, with FP32 master weights and Adam states.
+
+The retained training runs had the following approximate runtimes:
+
+| Run | RL updates | Approx. runtime\* |
+| :--- | ---: | ---: |
+| 4×4 climb | 1,000 | 16 h 53 min |
+| 5×5, 9 givens / 5 inequalities | 100 | 3 h 27 min |
+| 5×5, 8 givens / 7 inequalities | 100 | 3 h 22 min |
+| 5×5, 6 givens / 8 inequalities | 100 | 4 h 55 min |
+
+\* Recorded elapsed time includes in-run evaluation and checkpointing. The 4×4 figure sums three completed segments; gaps between segments, preparation, and canceled runs are excluded. I added inference-engine optimizations as the project progressed, so these stage times aren't a fixed-engine comparison.
+
+In a controlled RTX 4090 collection benchmark, each path generated 1,048,576 output tokens: 128 requests of 8,192 tokens each, with a 6 GiB optimizer-equivalent reservation. Timings exclude warmup and model loading. This comparison adds an FP8 KV cache to the existing FP8 MLP engine:
+
+| Measure | FP8 MLP + BF16 KV | FP8 MLP + FP8 KV |
+| :--- | ---: | ---: |
+| Output tokens/second | 11,690 | 18,130 |
+| Collection seconds | 89.70 | 57.84 |
+| Peak allocated memory | 22.79 GiB | 16.46 GiB |
+
+That's roughly 55% more collection throughput and 35.5% less collection time, not a measurement of complete training-update speed. In a separate equal-work comparison, using an FP8 MLP instead of BF16 raised throughput from 10,889 to 11,601 tokens per second, about 6.5%.
+
+Using different numerical paths for sampling and learning can produce different token probabilities, even with no policy lag, and those differences can bias the gradient. The later runs combined masked importance sampling with [score centering](https://arxiv.org/abs/2609.20807), an additive correction intended to address drift from this mismatch. At each generated position, the sampler recorded the sampled token's log probability and its top 32 token log probabilities; sampling itself retained full support. The unrecorded probability tail was approximated using the learner's distribution. Score centering is different from centering the binary rewards, and it doesn't make the two distributions identical. The paper's authors also provide an [implementation](https://github.com/martin-marek/score-centering).
+
+## Appendix: Selected Futoshiki traces
+
+<FutoshikiReasoningComparison archive />
+
+These selected responses come from the cumulative update-280 validation checkpoint, not a representative sample. The successful response solves a hardest-tier puzzle in 907 tokens; the other, from a different puzzle, reaches the 8,192-token limit without an answer block. The archived outputs are available, but the update-280 weights were deleted; the later update-300 weights remain.
+
+<FutoshikiTraces />
+
+[^regression-investigation]: See [Investigating the regression](#appendix-investigating-the-regression) for the checks I ran.
+
+[^curriculum]: Yoshua Bengio, Jérôme Louradour, Ronan Collobert, and Jason Weston, [“Curriculum Learning”](https://ronan.collobert.com/pub/2009_curriculum_icml.pdf), ICML 2009.
+
+[^countdown-transfer]: In a separate, earlier Countdown-trained branch, I reached 2.34% strict pass@1 (3/128, one attempt per puzzle). A follow-up with eight attempts per puzzle estimated 1.37% pass@1 (14/1,024); both used a 4,096-token limit. That branch had no Futoshiki training, so SFT was not the only way to get an initial signal.
+
+[^specialist-context]: Spork uses on-policy teacher-logit distillation; my restart used projected responses and SFT. Other approaches organize training differently: [Inkling 2 Small](https://thinkingmachines.ai/news/inkling-2-small/) switched from separate reasoning and agentic RL followed by multi-teacher distillation to a single joint RL run, while [DeepSeek-V4](https://arxiv.org/html/2606.19348) describes multiple teachers. Scale and task mix may matter, but these are not controlled comparisons with this experiment.

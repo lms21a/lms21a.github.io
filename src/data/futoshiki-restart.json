@@ -1,0 +1,40 @@
+{
+  "source": {
+    "path": "/mnt/d/SimplePT/runs/training/futoshiki5_two_expert_projection_sft_prewarmup_20261015/result.json",
+    "metadata": {
+      "bytes": 3427,
+      "sha256": "2d3fe1dd90587ad5c2b7897745a3aa1cdd97bb6fbfacaa49264200f013884e40"
+    }
+  },
+  "student_initialization": "4\u00d74 RL1000, before the balanced 5\u00d75 warmup",
+  "examples_per_tier": 1024,
+  "epochs": 2,
+  "retained_updates": 128,
+  "evaluation_tokens": 8192,
+  "attempts": 4,
+  "final_test_evaluated": false,
+  "tiers": [
+    {
+      "id": "5x5_g11_i5",
+      "label": "Easy \u00b7 11 givens / 5 inequalities",
+      "puzzles": 256,
+      "samples": 1024,
+      "specialist_correct": 504,
+      "specialist_pass_at_1": 0.4921875,
+      "student_correct": 369,
+      "student_pass_at_1": 0.3603515625,
+      "student_pass_at_4": 0.671875
+    },
+    {
+      "id": "5x5_g9_i5",
+      "label": "Next \u00b7 9 givens / 5 inequalities",
+      "puzzles": 256,
+      "samples": 1024,
+      "specialist_correct": 192,
+      "specialist_pass_at_1": 0.1875,
+      "student_correct": 116,
+      "student_pass_at_1": 0.11328125,
+      "student_pass_at_4": 0.30859375
+    }
+  ]
+}

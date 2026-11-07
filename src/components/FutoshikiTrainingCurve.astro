@@ -1,0 +1,56 @@
+---
+import ResearchPlot from './ResearchPlot.astro';
+import desktop from '../assets/research/futoshiki-training-curve750.png';
+import mobile from '../assets/research/futoshiki-training-curve750-mobile.png';
+import data from '../data/futoshiki-training-curve.json';
+const percent = (fraction: number) => `${(fraction * 100).toFixed(2)}%`;
+---
+<figure class="training-curve" data-futoshiki-training-curve>
+  <p class="curve-kicker">The first 750 updates · 4K monitoring</p>
+  <p class="curve-title">The 4×4 learning curve</p>
+  <p class="curve-intro">The same 32 validation puzzles, eight attempts each, with a 4,096-token limit throughout.</p>
+  <ResearchPlot desktop={desktop} mobile={mobile} alt="39 saved 4K validation measurements through update 750. Pass@1 rises unevenly from 3.52% before RL to 52.34% at update 750, on 32 fixed puzzles with eight attempts each." />
+  <figcaption>The line shows the training-time validation monitor, without smoothing. The 57.13% quoted above comes from a separate test of 128 puzzles × eight attempts at 8K, shown in the next figure. Monitoring and test scores use different panels and token budgets.</figcaption>
+  <details class="curve-details">
+    <summary>Exact monitoring points and token-limit evidence</summary>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="All 39 saved validation measurements">
+      <table>
+        <thead><tr><th scope="col">RL update</th><th scope="col">Pass@1</th><th scope="col">Correct attempts</th><th scope="col">At the 4K cap</th></tr></thead>
+        <tbody>{data.points.map(point => <tr><th scope="row">{point.update}</th><td>{percent(point.pass_at_1)}</td><td>{point.correct_completions}/{point.completions}</td><td>{percent(point.cap_hit_rate)}</td></tr>)}</tbody>
+      </table>
+    </div>
+    <p class="evidence-heading">Why give the harder tiers more room?</p>
+    <p class="evidence-note">In the separate 128-puzzle 4K test at update 750, the two harder tiers reached the cap more often than the two easier tiers. Each row below has 32 puzzles × eight attempts.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Token-limit hits by 4×4 puzzle tier">
+      <table>
+        <thead><tr><th scope="col">Givens / inequalities</th><th scope="col">At the 4K cap</th><th scope="col">Attempts</th></tr></thead>
+        <tbody>{data.token_cap_evidence.tiers.map(tier => <tr><th scope="row">{tier.givens} / {tier.inequalities}</th><td>{percent(tier.rate)}</td><td>{tier.cap_hits}/{tier.completions}</td></tr>)}</tbody>
+      </table>
+    </div>
+    <a class="recorded-run" href={data.wandb_url}>Recorded training run ↗</a>
+  </details>
+</figure>
+<style>
+  .training-curve { margin-block: 36px; padding-block: 25px; border-block: 1px solid var(--rule); }
+  .curve-kicker { margin: 0 0 9px; color: var(--green); font-size: 10px; line-height: 1.6; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+  .curve-title { margin: 0; font-family: var(--serif); font-size: 30px; line-height: 1.2; font-weight: 550; }
+  .curve-intro { color: var(--muted); font-size: 12px; line-height: 1.8; margin: 12px 0 18px; }
+  .training-curve figcaption, .evidence-note { color: var(--muted); font-size: 11px; line-height: 1.8; text-align: left; margin: 13px 0 0; }
+  .curve-details { margin-top: 18px; }
+  .curve-details summary { color: var(--green); font-size: 12px; line-height: 1.7; cursor: pointer; }
+  summary:focus-visible, .table-scroll:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .table-scroll { overflow: auto; max-height: 330px; margin-top: 13px; }
+  .training-curve table { display: table; width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.7; margin: 0; }
+  .training-curve th, .training-curve td { min-width: 0; padding: 9px 7px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+  .training-curve th { font-weight: 500; }
+  .training-curve th:first-child { text-align: left; }
+  .training-curve thead { position: sticky; top: 0; background: var(--paper); }
+  .evidence-heading { font-family: var(--serif); font-size: 23px; line-height: 1.3; margin: 24px 0 0; }
+  .recorded-run { display: inline-block; margin-top: 18px; font-size: 12px; }
+  @media (max-width: 620px) {
+    .curve-title { font-size: 26px; }
+    .curve-details summary { min-height: 44px; padding-block: 10px; }
+    .training-curve table { font-size: 11px; }
+    .training-curve th, .training-curve td { padding: 9px 5px; }
+  }
+</style>

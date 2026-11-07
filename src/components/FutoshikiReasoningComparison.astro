@@ -1,0 +1,75 @@
+---
+import data from '../data/futoshiki-reasoning-comparison.json';
+import FutoshikiTraceGrid from './FutoshikiTraceGrid.astro';
+
+interface Props { archive?: boolean }
+const { archive = false } = Astro.props;
+---
+
+{archive ? <section class="reasoning-archive" aria-label="Complete before-and-after Futoshiki responses">
+  <p class="comparison-title">The same puzzle, before and after the curriculum</p>
+  <p class="archive-intro">An 11-given, five-inequality puzzle from the fixed 5×5 validation panel. Both checkpoints had an 8,192-token window and four attempts per puzzle.</p>
+  {data.traces.map(trace => <details class="response-archive" data-reasoning-response={trace.phase}>
+    <summary>{trace.label} · {trace.tokens.toLocaleString('en-US')} tokens · {trace.outcome.toLowerCase()}</summary>
+    <pre tabindex="0" aria-label={`${trace.label}: full archived response`}>{trace.response}</pre>
+  </details>)}
+  <p class="archive-note">{data.reasoning_note}</p>
+  <details class="puzzle-archive">
+    <summary>Inspect the shared puzzle and saved prompt</summary>
+    <FutoshikiTraceGrid puzzle={data.puzzle} prefix="reasoning-comparison" />
+    <p>Letters identify unknown cells; digits are fixed. The grid is drawn for the reader. The text below is the saved puzzle prompt; the chat template supplied the opening thinking tag. The reference solution was not provided to the model.</p>
+    <pre tabindex="0" aria-label="Shared archived puzzle prompt">{data.puzzle.prompt}</pre>
+  </details>
+  <details class="selection-archive">
+    <summary>How this pair was selected</summary>
+    <p>{data.selection.rule} This is an illustration selected by outcome, length, and wording; it does not estimate how often either reasoning style occurs.</p>
+    <p>All 256 puzzle IDs and prompt texts match across archives. These responses occupy output {data.selection.output_index}, puzzle {data.selection.puzzle_index}, sample {data.selection.sample_index} (zero-based). Final-assignment and tag checks reproduce the recorded 364/1,024 and 692/1,024 correct responses on this panel.</p>
+    <p>Puzzle ID: <code>{data.puzzle.id}</code></p>
+    {data.sources.map((source, index) => <p>{data.traces[index].label}: <code>{source.path}</code></p>)}
+  </details>
+</section> : <figure class="reasoning-comparison" aria-label="Selected before-and-after responses to the same Futoshiki puzzle">
+  <p class="comparison-kicker">Same 5×5 puzzle · 11 givens / 5 inequalities</p>
+  <p class="comparison-title">From repeated retries to a direct check</p>
+  <div class="comparison-pair">
+    {data.traces.map(trace => <section class:list={['comparison-card', trace.phase]}>
+      <p class="phase-label">{trace.label}</p>
+      <p class="token-count">{trace.tokens.toLocaleString('en-US')} <span>tokens</span></p>
+      <p class="outcome-label">{trace.outcome}</p>
+      <pre aria-label={`${trace.label}: verbatim excerpt`}>{trace.excerpt.trim()}</pre>
+    </section>)}
+  </div>
+  <figcaption>Verbatim excerpts from one selected earlier failure and later success on the same validation puzzle. Both had an 8,192-token limit. <a href="#appendix-selected-futoshiki-traces">Full responses, puzzle input, and selection details ↓</a></figcaption>
+</figure>}
+
+<style>
+  .reasoning-comparison, .reasoning-archive { margin-block: 32px; }
+  .reasoning-comparison { padding-block: 24px; border-block: 1px solid var(--rule); }
+  .comparison-kicker { color: var(--green); font-size: 10px; font-weight: 600; line-height: 1.7; text-transform: uppercase; letter-spacing: .07em; margin: 0 0 8px; }
+  .comparison-title { font-family: var(--serif); font-size: 28px; line-height: 1.25; font-weight: 550; margin: 0; }
+  .comparison-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 22px; }
+  .comparison-card { min-width: 0; padding: 18px 16px; border: 1px solid var(--rule); border-radius: 4px; background: #faf9f5; }
+  .comparison-card.after { border-color: #94a38b; background: #f0f2e8; }
+  .phase-label { font-size: 11px; line-height: 1.6; color: var(--muted); margin: 0; }
+  .after .phase-label, .after .outcome-label { color: var(--green); }
+  .token-count { font-family: var(--serif); font-size: 32px; line-height: 1.3; margin: 9px 0 3px; font-variant-numeric: tabular-nums; }
+  .token-count span { font-family: var(--sans); color: var(--muted); font-size: 11px; }
+  .outcome-label { color: #965f45; font-size: 11px; line-height: 1.6; margin: 0 0 18px; }
+  pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); margin: 0; background: transparent; padding: 0; }
+  figcaption, .archive-intro, .archive-note, details > p { color: var(--muted); font-size: 11px; line-height: 1.8; margin: 15px 0 0; text-align: left; }
+  figcaption a { color: var(--green); }
+  .response-archive, .puzzle-archive, .selection-archive { border-top: 1px solid var(--rule); margin-top: 16px; padding-top: 12px; }
+  summary { color: var(--green); cursor: pointer; font-size: 12px; line-height: 1.8; }
+  details > pre { margin-top: 15px; max-height: 480px; overflow-y: auto; padding: 16px; background: #f5f4ed; border: 1px solid var(--rule); border-radius: 3px; }
+  .puzzle-archive :global(svg) { margin-top: 20px; }
+  details > p { overflow-wrap: anywhere; }
+  details code { background: transparent; color: var(--muted); font-size: 10px; }
+  summary:focus-visible, pre:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  @media (max-width: 620px) {
+    .comparison-title { font-size: 25px; }
+    .comparison-pair { grid-template-columns: 1fr; gap: 12px; }
+    .comparison-card { padding: 18px 15px; }
+    .comparison-card pre { font-size: 12px; }
+    summary { min-height: 44px; padding-block: 9px; }
+    details > pre { padding: 12px; }
+  }
+</style>

@@ -1,0 +1,100 @@
+{
+  "protocol": {
+    "puzzles": 128,
+    "samples_per_puzzle": 8,
+    "max_new_tokens": 4096,
+    "temperature": 1,
+    "seed": 20261001,
+    "grading": "strict exact final assignment and format"
+  },
+  "recipes": [
+    {
+      "id": "solver",
+      "label": "Solver-grounded",
+      "examples": 512,
+      "epochs": 4,
+      "optimizer_updates": 512,
+      "correct_completions": 274,
+      "completions": 1024,
+      "solved_puzzles": 95,
+      "puzzles": 128,
+      "source": "/home/lukas928/SimplePT/runs/training/futoshiki_solver_rewrite512_sft_20261010/result.json"
+    },
+    {
+      "id": "projected512",
+      "label": "Projected \u00b7 larger run",
+      "examples": 512,
+      "epochs": 2,
+      "optimizer_updates": 256,
+      "correct_completions": 117,
+      "completions": 1024,
+      "solved_puzzles": 67,
+      "puzzles": 128,
+      "source": "/home/lukas928/SimplePT/runs/experiments/futoshiki_epochs_solver_projection_20261010/result.json"
+    },
+    {
+      "id": "projected256",
+      "label": "Projected \u00b7 selected for RL",
+      "examples": 256,
+      "epochs": 1,
+      "optimizer_updates": 64,
+      "correct_completions": 43,
+      "completions": 1024,
+      "solved_puzzles": 28,
+      "puzzles": 128,
+      "source": "/home/lukas928/SimplePT/runs/experiments/futoshiki_epochs_solver_projection_20261010/result.json"
+    }
+  ],
+  "trace_pair": {
+    "puzzle_id": "77dc73453f6c5ca3b514e0cf71bf43f402244fdb889813d18aba4c3e268e5e4e",
+    "tier": "4x4_g7_i3",
+    "selection": "First held-out puzzle in the raw-solver output archive with at least one strict-correct completion in both archives; first strict-correct response per model for that puzzle.",
+    "common_solved_puzzles": 24,
+    "model_input": "Solve this number-constraint puzzle.\n\nUnknown variables: B, C, F, G, H, J, L, M, O.\n\nRules:\n- Each unknown is an integer from 1 to 4.\n- Satisfy every remaining-value constraint below.\n- A variable has the same value wherever it appears.\n- Numbers may be reused in different groups; within a listed group each listed number appears exactly once.\n\nRemaining-value constraints (fixed values have already been removed):\n- B, C must be 3, 4, in some order (each listed number exactly once).\n- F, G, H must be 1, 2, 4, in some order (each listed number exactly once).\n- J, L must be 1, 4, in some order (each listed number exactly once).\n- M, O must be 1, 4, in some order (each listed number exactly once).\n- M must be 4, in some order (each listed number exactly once).\n- B, F, J must be 1, 3, 4, in some order (each listed number exactly once).\n- C, G, O must be 1, 2, 4, in some order (each listed number exactly once).\n- H, L must be 1, 4, in some order (each listed number exactly once).\n\nInequalities (fixed values have already been substituted):\n- 1 < B\n- 2 < J\n- O < 2\n\nThe puzzle has exactly one solution. Reason through the constraints and check your assignment.\nFinish your reasoning with </thinking>, then give the unknown values inside <answer> and </answer>.\nWrite one NAME=number assignment for each unknown, in the order listed above. Separate assignments with spaces.\nOnly output the unknowns. Fixed values are supplied by the environment.",
+    "submitted_answer": "B=3 C=4 F=1 G=2 H=4 J=4 L=1 M=4 O=1",
+    "independent_check": {
+      "unknowns": 9,
+      "groups": 8,
+      "inequalities": 3,
+      "all_constraints_satisfied": true
+    },
+    "traces": [
+      {
+        "label": "Solver-grounded SFT",
+        "descriptor": "Repeated candidate-update templates",
+        "examples": 512,
+        "epochs": 4,
+        "output_index": 24,
+        "puzzle_index": 3,
+        "sample_index": 0,
+        "tokens": 1335,
+        "finish_reason": "stop",
+        "excerpt": "Group (B,C) uses {3,4} once each. Values outside this group's allowed set: {1,2}. Values must remain unique within each specified category. B: {1,2,3,4} -> {3,4}.\nGroup (B,C) uses {3,4} once each. Values outside this group's allowed set: {1,2}. Values must remain unique within each specified category. C: {1,2,3,4} -> {3,4}.\nGroup (F,G,H) uses {1,2,4} once each. Values outside this group's allowed set: {3}. Values must remain unique within each specified category. F: {1,2,3,4} -> {1,2,4}.",
+        "response": "I will track the candidates for each unknown, apply each group and inequality constraint, and check the completed assignment.\nInitial candidates: B={1,2,3,4}; C={1,2,3,4}; F={1,2,3,4}; G={1,2,3,4}; H={1,2,3,4}; J={1,2,3,4}; L={1,2,3,4}; M={1,2,3,4}; O={1,2,3,4}.\nGroup (B,C) uses {3,4} once each. Values outside this group's allowed set: {1,2}. Values must remain unique within each specified category. B: {1,2,3,4} -> {3,4}.\nGroup (B,C) uses {3,4} once each. Values outside this group's allowed set: {1,2}. Values must remain unique within each specified category. C: {1,2,3,4} -> {3,4}.\nGroup (F,G,H) uses {1,2,4} once each. Values outside this group's allowed set: {3}. Values must remain unique within each specified category. F: {1,2,3,4} -> {1,2,4}.\nGroup (F,G,H) uses {1,2,4} once each. Values outside this group's allowed set: {3}. Values must remain unique within each specified category. G: {1,2,3,4} -> {1,2,4}.\nGroup (F,G,H) uses {1,2,4} once each. Values outside this group's allowed set: {3}. Values must remain unique within each specified category. H: {1,2,3,4} -> {1,2,4}.\nGroup (J,L) uses {1,4} once each. Values outside this group's allowed set: {2,3}. Values must remain unique within each specified category. J: {1,2,3,4} -> {1,4}.\nGroup (J,L) uses {1,4} once each. Values outside this group's allowed set: {2,3}. Values must remain unique within each specified category. L: {1,2,3,4} -> {1,4}.\nGroup (M,O) uses {1,4} once each. Values outside this group's allowed set: {2,3}. Values must remain unique within each specified category. M: {1,2,3,4} -> {1,4}.\nGroup (M,O) uses {1,4} once each. Values outside this group's allowed set: {2,3}. Values must remain unique within each specified category. O: {1,2,3,4} -> {1,4}.\nGroup (M) uses {4} once each. Values outside this group's allowed set: {1}. Values must remain unique within each specified category. M: {1,4} -> {4}.\nGroup (B,F,J) uses {1,3,4} once each. Values outside this group's allowed set: {2}. Values must remain unique within each specified category. F: {1,2,4} -> {1,4}.\nGroup (B,F,J) uses {1,3,4} once each. Only B still permits the required value 3. Each set must contain all required elements precisely once. B: {3,4} -> {3}.\nGroup (C,G,O) uses {1,2,4} once each. Values outside this group's allowed set: {3}. Values must remain unique within each specified category. C: {3,4} -> {4}.\nGroup (C,G,O) uses {1,2,4} once each. Only G still permits the required value 2. Each set must contain all required elements precisely once. G: {1,2,4} -> {2}.\nGroup (H,L) uses {1,4} once each. Values outside this group's allowed set: {2}. Values must remain unique within each specified category. H: {1,2,4} -> {1,4}.\nO < 2; left candidates {1,4}; right candidates {2}. Ensure each side of the condition has compatible candidates from the other set. O: {1,4} -> {1}.\nGroup (B,F,J) uses {1,3,4} once each. Values already assigned to other members of this group: {4}. Values must remain unique within each specified category. F: {1,4} -> {1}.\nGroup (B,F,J) uses {1,3,4} once each. Only J still permits the required value 4. Each set must contain all required elements precisely once. J: {1,4} -> {4}.\nGroup (H,L) uses {1,4} once each. Only H still permits the required value 4. Each set must contain all required elements precisely once. H: {1,4} -> {4}.\nAll groups have distinct elements and satisfy their respective constraints.\nGroup (B,C): {3,4} contains {3,4} once each.\nGroup (F,G,H): {1,2,4} contains {1,2,4} once each.\nGroup (J,L): {4,1} contains {1,4} once each.\nGroup (M,O): {4,1} contains {1,4} once each.\nGroup (M): {4} contains {4} once each.\nGroup (B,F,J): {3,1,4} contains {1,3,4} once each.\nGroup (C,G,O): {4,2,1} contains {1,2,4} once each.\nGroup (H,L): {4,1} contains {1,4} once each.\nInequality checks: 1 < B: 1 < 3; 2 < J: 2 < 4; O < 2: 1 < 2.\n</thinking>\n<answer>B=3 C=4 F=1 G=2 H=4 J=4 L=1 M=4 O=1</answer><|im_end|>",
+        "response_sha256": "c0e7d8d6eca55eceefb04ec950b3b88cf76e5c0e407389cde83d65d5d11ba81d",
+        "source": "/home/lukas928/SimplePT/runs/training/futoshiki_solver_rewrite512_sft_20261010/generations/epoch_4_test_graded.jsonl"
+      },
+      {
+        "label": "Projected SFT",
+        "descriptor": "First-person guesses and retries",
+        "examples": 256,
+        "epochs": 1,
+        "output_index": 26,
+        "puzzle_index": 3,
+        "sample_index": 2,
+        "tokens": 1110,
+        "finish_reason": "stop",
+        "excerpt": "From O < 2, O can only be 1. Then O = 1. That leaves M and L with 4. But M, O are both 1 and 4, so conflict unless we adjust.\n\nWait, let's try assigning systematically:\n\nGiven O = 1 (from O < 2)\nThen M, O both must be 4, but M and O need to be separate. So O=1, M=4, L=4 \u2014 contradiction since L must be 1,4 and M=4, O=1.\n\nLet me retrace.",
+        "response": "I need to carefully unpack the constraints step by step. First, I have the list of variables: B, C, F, G, H, J, L, M, O. Each must be assigned a unique number from 1 to 4. The fixed values are constrained too, so I must figure out which numbers go where.\n\nStarting with the triple constraints:\n- B and C must be {3,4}.\n- F, G, H must be {1,2,4}.\n- J, L must be {1,4}.\n- M, O must be {1,4}.\n- Several combinations arise from permutations.\n\nNext, looking at inequalities:\n- B, C must be 3,4 in some order.\n- F, G, H must be 1,2,4 in some order.\n- J, L must be 1,4 in some order.\n- M, O must be 1,4 in some order.\n- And specific groups like B, F, J = {1,3,4}\n- C, G, O = {1,2,4}\n- H, L = {1,4}\n- O < 2\n- 1 < B\n\nFrom O < 2, O can only be 1. Then O = 1. That leaves M and L with 4. But M, O are both 1 and 4, so conflict unless we adjust.\n\nWait, let's try assigning systematically:\n\nGiven O = 1 (from O < 2)\nThen M, O both must be 4, but M and O need to be separate. So O=1, M=4, L=4 \u2014 contradiction since L must be 1,4 and M=4, O=1.\n\nLet me retrace.\n\nWe have:\n- O = 1 (from O < 2)\n- From O < 2, O \u2208 {1}\n- M, O: M=4, O=1 fits.\n- C, G, O: O=1, so C, G must be 2,3 in some order.\n- B, C: must be 3,4\n- F, G, H: must be 1,2,4\n- J, L: must be 1,4\n- M, O: M=4, O=1\n\nNow try placing O=1, M=4, L=4 (but L must be 1), so invalid.\n\nTry M=4, O=1 \u2192 L=4 but L must be 1 \u2192 conflict.\n\nThis suggests merging possibilities. Perhaps better to list valid sets:\n\nFrom fixed assignments:\n- O=1\n- M=4\n- L=4? No, L must be 1\nWait, L must be 1 or 4. If L=1, then M=4 and O=1 \u2192 conflict since O=1.\n\nSo:\n- O=1\n- M=4\n- L=...\nmust be 1 \u2192 contradiction unless M and O share.\n\nSeems tricky. Let's assign step-by-step matching.\n\nGiven M and O together are 4 and 1 in some order. So M=4, O=1 or vice versa.\n\nBut M>=1, O<=4, etc.\n\nTrying M=4, O=1:\nThen M=4, O=1\nF, G, H must be 2,3,4\nC, G, O must be 3,4 but O=1 so no.\n\nNot working.\n\nTry O=4. Then O=4, which violates O < 2 \u2192 no.\n\nThus O must be 1. Correct.\n\nSo O=1.\n\nThen M and L must be 4 and 1 respectively? But L must be 1, M must be 4.\n\nThus L=1, M=4.\n\nNow fix:\nO=1\nL=1 \u2192 conflict since only one each allowed!\nWait, variables are distinct across groups and cannot repeat in a group.\n\nWe have to assign all eight uniquely across all variables.\n\nLooking back, perhaps the only consistent assignment is:\n\nB=3, C=4  \nF=1, G=2, H=4  \nJ=4, L=1  \nM=4, O=1\n\nCheck constraints quickly:\n- B,C = 3,4 \u2192 valid\n- F,G,H = 1,2,4 \u2192 valid\n- J,L = 4,1 \u2192 valid\n- M,O = 4,1 \u2192 valid\n- Other constraints: B,F,J = 3,1,4 \u2192 1<3,4,4<3 \u2192 OK\n- C,G,O = 4,2,1 \u2192 1<2,4,2 \u2192 OK\n- H,L = 4,1 \u2192 1<4,4<1 \u2192 OK\n- All numbers 1\u20134 once used.\n\nThis works.\n\nThus final assignment fits all.\n</thinking>\n<answer>B=3 C=4 F=1 G=2 H=4 J=4 L=1 M=4 O=1</answer><|im_end|>",
+        "response_sha256": "77a9e72e75f2e5f12ec03a71825d633dd0e94695dfb311adf7d0baf7466fe1b2",
+        "source": "/home/lukas928/SimplePT/runs/experiments/futoshiki_epochs_solver_projection_20261010/arms/projection256/eval/epoch_1/test_graded.jsonl"
+      }
+    ]
+  },
+  "source_audit": "planning/rl-hill-climbing/solver-projection-panel-audit.json",
+  "limitations": [
+    "Training example counts, epochs, and learning-rate schedules differ. These endpoints do not establish relative learning speed.",
+    "The solver-grounded corpus uses fixed algorithmic steps with shared short model-written rule paraphrases.",
+    "Both selected final assignments pass, while the projected response has false intermediate assertions. Conversational style is not evidence of faithful reasoning."
+  ]
+}

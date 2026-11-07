@@ -1,0 +1,103 @@
+---
+import data from '../data/futoshiki-curriculum.json';
+const percent = (value: number) => `${(value * 100).toFixed(2)}%`;
+const hardest = data.rows.find(row => row.id === '5x5_g6_i8')!;
+const beforeHardest = hardest.values[2]!;
+const finalHardest = hardest.values[4]!;
+const metrics = [{ key: 'pass_at_1', label: 'Pass@1' }, { key: 'pass_at_4', label: 'Pass@4' }] as const;
+---
+<figure class="curriculum-results" data-curriculum-results>
+  <p class="results-kicker">Three stages after the projected restart</p>
+  <p class="results-title">Following the climb across tiers</p>
+  <p class="results-intro">Tier names follow the observed solve rates in this experiment. Givens and inequalities label each puzzle group.</p>
+  <div class="metric-controls" role="group" aria-label="Choose the curriculum success metric">
+    {metrics.map((metric, index) => <button type="button" data-curriculum-metric={metric.key} aria-pressed={index === 0 ? 'true' : 'false'} aria-controls={`curriculum-${metric.key}`}>{metric.label}</button>)}
+  </div>
+  <p class="scroll-hint">Swipe across the table to compare checkpoints →</p>
+  {metrics.map((metric, index) => <div id={`curriculum-${metric.key}`} data-curriculum-panel={metric.key} hidden={index !== 0}>
+    <div class="table-scroll" tabindex="0" role="region" aria-label={`${metric.label} by tier and checkpoint`}>
+      <table>
+        <caption>{metric.label} · 256 fixed validation puzzles per tier, four attempts each, 8,192 tokens</caption>
+        <thead><tr><th scope="col">5×5 tier<small>Givens / inequalities</small></th>{data.columns.map(column => <th scope="col" class:list={{ 'peak-column': column.id === 'peak' }}>{column.label}<small>{column.update === 0 ? 'Fresh SFT evaluation' : `${column.update} RL updates`}</small></th>)}</tr></thead>
+        <tbody>{data.rows.map(row => <tr>
+          <th scope="row"><strong>{row.label}</strong><small>{row.givens} givens / {row.inequalities} inequalities</small></th>
+          {row.values.map((point, column) => <td class:list={{ unmeasured: point === null, 'training-cell': data.columns[column].train_tier === row.id }} style={point ? `background-color:rgba(55,92,72,${.025 + .23 * point[metric.key]})` : undefined}>
+            {point ? <><span>{percent(point[metric.key])}</span><span class="sr-only">{metric.key === 'pass_at_1' ? `${point.correct_completions} correct attempts out of ${point.samples}` : `${Math.round(point.pass_at_4 * point.problems)} puzzles solved out of ${point.problems}`}</span></> : <span aria-label="Not measured">—</span>}
+          </td>)}
+        </tr>)}</tbody>
+      </table>
+    </div>
+  </div>)}
+  <p class="table-key"><span class="outline-key" aria-hidden="true"></span> Outlined cells mark the training tier. Dashes mean that panel was not measured at that checkpoint.</p>
+  <div class="final-stage">
+    <p>What the last 100 updates changed</p>
+    <dl>
+      <div><dt>Hardest pass@1</dt><dd>{percent(beforeHardest.pass_at_1)} → {percent(finalHardest.pass_at_1)}</dd></div>
+      <div><dt>Four-tier pooled pass@1</dt><dd class="tradeoff">{percent(data.final_stage.before.pass_at_1)} → {percent(data.final_stage.final.pass_at_1)}</dd><small>Selected peak at update 280: {percent(data.final_stage.peak.pass_at_1)}</small></div>
+    </dl>
+  </div>
+  <figcaption>Updates are counted from this projected restart. “Before RL” is a fresh evaluation of the same retained SFT student with the curriculum rollout engine. Each tier uses 256 validation puzzles × four attempts at 8K; these panels were monitored for checkpoint selection. Update 280 was selected by four-tier pooled pass@1. New baselines at updates 100 and 200 fill in the next tier before its training. The separate mixed test uses a different panel.</figcaption>
+  <details class="source-details"><summary>Stages and recorded runs</summary><ol>{data.stages.map((stage, index) => <li><a href={stage.wandb.url}>Stage {index + 1}</a>: 100 updates, {stage.training_examples.toLocaleString('en-US')} learner responses.</li>)}</ol></details>
+</figure>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-curriculum-results]').forEach(figure => {
+    const controls = figure.querySelectorAll<HTMLButtonElement>('[data-curriculum-metric]');
+    const panels = figure.querySelectorAll<HTMLElement>('[data-curriculum-panel]');
+    controls.forEach(button => button.addEventListener('click', () => {
+      controls.forEach(control => control.setAttribute('aria-pressed', String(control === button)));
+      panels.forEach(panel => { panel.hidden = panel.dataset.curriculumPanel !== button.dataset.curriculumMetric; });
+    }));
+  });
+</script>
+<style>
+  .curriculum-results { border-block: 1px solid var(--rule); padding-block: 25px; margin-block: 36px; }
+  .results-kicker { font-size: 10px; line-height: 1.6; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .results-title { font-family: var(--serif); font-size: 30px; line-height: 1.2; font-weight: 550; margin: 0 0 10px; }
+  .results-intro { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0; }
+  .metric-controls { display: flex; gap: 8px; margin-block: 20px; }
+  .metric-controls button { border: 1px solid var(--rule); background: transparent; border-radius: 3px; font-family: var(--sans); font-size: 12px; color: var(--muted); padding: 10px 16px; cursor: pointer; }
+  .metric-controls button[aria-pressed='true'] { color: var(--green); border-color: var(--green); background: #e9eddf; }
+  button:focus-visible, summary:focus-visible, .table-scroll:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .table-scroll { overflow-x: auto; scrollbar-width: thin; }
+  .curriculum-results table { display: table; width: 100%; min-width: 680px; border-collapse: separate; border-spacing: 4px; font-size: 12px; line-height: 1.5; margin: 0; }
+  .curriculum-results caption { text-align: left; color: var(--muted); font-size: 11px; line-height: 1.7; padding: 0 4px 12px; }
+  .curriculum-results th, .curriculum-results td { min-width: 0; border: 0; padding: 11px 7px; text-align: center; font-weight: 500; }
+  .curriculum-results thead th { background: #edf0e7; color: var(--green); font-size: 11px; }
+  .curriculum-results th:first-child { position: sticky; left: 0; z-index: 1; text-align: left; width: 170px; background: var(--paper); }
+  .curriculum-results th strong { font-weight: 550; font-size: 13px; }
+  .curriculum-results th small { display: block; font-size: 9px; line-height: 1.6; font-weight: 400; margin-top: 4px; color: var(--muted); }
+  .curriculum-results td { position: relative; color: var(--green); font-variant-numeric: tabular-nums; border: 1px solid transparent; border-radius: 3px; }
+  .curriculum-results td.unmeasured { color: #90978b; background: #f0f0e9; }
+  .curriculum-results td.training-cell { border-color: #6c8566; }
+  .curriculum-results .peak-column { box-shadow: inset 0 2px #aabd9d; }
+  .table-key { font-size: 10px; line-height: 1.7; color: var(--muted); margin: 13px 4px 0; }
+  .outline-key { display: inline-block; width: 10px; height: 10px; border: 1px solid #6c8566; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+  .scroll-hint { display: none; }
+  .final-stage { margin-top: 23px; border-block: 1px solid var(--rule); padding-block: 18px; }
+  .final-stage > p { font-size: 11px; line-height: 1.6; color: var(--green); margin: 0 0 13px; }
+  .final-stage dl { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; margin: 0; }
+  .final-stage dt { font-size: 10px; line-height: 1.6; color: var(--muted); }
+  .final-stage dd { font-family: var(--serif); font-size: 23px; line-height: 1.4; color: var(--green); margin: 7px 0 0; white-space: nowrap; }
+  .final-stage dd.tradeoff { color: #965f45; }
+  .final-stage small { display: block; font-size: 9px; line-height: 1.6; color: var(--muted); margin-top: 4px; }
+  .curriculum-results figcaption { font-size: 11px; line-height: 1.7; color: var(--muted); text-align: left; margin: 18px 0 0; }
+  .source-details { margin-top: 14px; }
+  .source-details summary { cursor: pointer; font-size: 12px; line-height: 1.7; color: var(--green); }
+  .source-details ol { font-size: 12px; line-height: 1.7; padding-left: 20px; color: var(--muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  [hidden] { display: none !important; }
+  @media (min-width: 621px) and (max-width: 800px) { .final-stage dd { font-size: 18px; } }
+  @media (max-width: 620px) {
+    .results-title { font-size: 26px; }
+    .metric-controls button { min-height: 44px; font-size: 13px; }
+    .scroll-hint { display: block; font-size: 10px; line-height: 1.7; color: var(--muted); margin: -3px 0 12px; }
+    .curriculum-results table { min-width: 650px; }
+    .curriculum-results th:first-child { width: 145px; }
+    .curriculum-results th, .curriculum-results td { padding-block: 12px; }
+    .final-stage dl { grid-template-columns: minmax(0,1fr); gap: 17px; }
+    .final-stage dd { font-size: 27px; }
+    .final-stage dt { font-size: 12px; }
+    .final-stage small { font-size: 10px; }
+    .source-details summary { min-height: 44px; padding-block: 10px; }
+  }
+</style>

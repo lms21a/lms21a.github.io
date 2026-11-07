@@ -2,7 +2,7 @@
 title: "A research notebook, in progress"
 description: "A home for experiment notes, results, and questions worth following."
 date: 2026-11-05
-draft: false
+draft: true
 tags: [Notebook]
 ---
 

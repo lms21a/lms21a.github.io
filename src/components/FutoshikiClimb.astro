@@ -1,0 +1,43 @@
+---
+import ResearchPlot from './ResearchPlot.astro';
+import desktop from '../assets/research/futoshiki-climb.png';
+import mobile from '../assets/research/futoshiki-climb-mobile.png';
+import data from '../data/futoshiki-climb.json';
+const percent = (count: number, total: number) => `${(100 * count / total).toFixed(2)}%`;
+---
+<figure class="futoshiki-climb" data-futoshiki-climb>
+  <p class="chart-kicker">Matched 8K evaluations</p>
+  <p class="chart-title">After the final 250 updates</p>
+  <ResearchPlot desktop={desktop} mobile={mobile} alt="Both checkpoints evaluated at 8,192 tokens. From RL750 to RL1000, 4×4 pass@1 rises from 57.13% to 77.44%. On the smaller 5×5 panel it rises from 1.95% to 5.08%." />
+  <figcaption>Both checkpoints use the same 8,192-token evaluation cap. The 4×4 panel has 128 puzzles × 8 attempts; 5×5 has 32 × 8. The final 250 training updates increased both the generation limit and the harder-tier share.</figcaption>
+  <details>
+    <summary>Exact results and panels</summary>
+    {data.panels.map(panel => <div class="panel-results"><p>{panel.label} · {panel.puzzles} puzzles</p><div class="table-wrap"><table>
+      <thead><tr><th scope="col">Checkpoint</th><th scope="col">Pass@1</th><th scope="col">Pass@8</th></tr></thead>
+      <tbody>{panel.checkpoints.map(checkpoint => <tr><th scope="row">RL {checkpoint.update.toLocaleString('en-US')}</th><td>{percent(checkpoint.correct_completions, checkpoint.completions)}<small>{checkpoint.correct_completions}/{checkpoint.completions} attempts</small></td><td>{percent(checkpoint.puzzles_solved, panel.puzzles)}<small>{checkpoint.puzzles_solved}/{panel.puzzles} puzzles</small></td></tr>)}</tbody>
+    </table></div></div>)}
+    <a href="https://wandb.ai/lukas928/simple-pt/runs/01m6d5a7">Recorded final evaluation ↗</a>
+  </details>
+</figure>
+<style>
+  .futoshiki-climb { margin-block: 36px; padding-block: 25px; border-block: 1px solid var(--rule); }
+  .chart-kicker { margin: 0 0 9px; color: var(--green); font-size: 10px; line-height: 1.6; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+  .chart-title { margin: 0 0 20px; font-family: var(--serif); font-size: 30px; line-height: 1.2; font-weight: 550; }
+  .futoshiki-climb figcaption { font-size: 11px; color: var(--muted); line-height: 1.7; text-align: left; margin-top: 12px; }
+  .futoshiki-climb details { margin-top: 18px; }
+  .futoshiki-climb summary { font-size: 12px; line-height: 1.7; color: var(--green); cursor: pointer; }
+  summary:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .panel-results > p { font-size: 13px; color: var(--green); margin: 18px 0 8px; }
+  .table-wrap { overflow-x: auto; }
+  .panel-results table { display: table; width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.6; }
+  .panel-results th, .panel-results td { min-width: 0; padding: 10px 6px; border-bottom: 1px solid var(--rule); text-align: right; }
+  .panel-results th:first-child { text-align: left; }
+  .panel-results th { font-weight: 500; }
+  .panel-results small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+  .futoshiki-climb details > a { display: inline-block; font-size: 12px; margin-top: 17px; }
+  @media (max-width: 620px) {
+    .chart-title { font-size: 26px; }
+    .futoshiki-climb summary { min-height: 44px; padding-block: 10px; }
+    .panel-results table { font-size: 11px; }
+  }
+</style>

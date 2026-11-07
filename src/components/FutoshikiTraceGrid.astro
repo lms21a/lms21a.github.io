@@ -1,0 +1,34 @@
+---
+interface Props {
+  puzzle: { size: number; givens: Record<string, number | undefined>; inequalities: number[][]; solution: number[] };
+  prefix: string;
+}
+const { puzzle, prefix } = Astro.props;
+const center = (cell: number) => ({ x: 38 + cell % puzzle.size * 56, y: 38 + Math.floor(cell / puzzle.size) * 56 });
+function inequalityPath(a: number, b: number) {
+  const start = center(a), end = center(b);
+  const x = (start.x + end.x) / 2, y = (start.y + end.y) / 2;
+  if (start.y === end.y) {
+    const tip = start.x < end.x ? -4 : 4;
+    return `M ${x - tip} ${y - 5} L ${x + tip} ${y} L ${x - tip} ${y + 5}`;
+  }
+  const tip = start.y < end.y ? -4 : 4;
+  return `M ${x - 5} ${y - tip} L ${x} ${y + tip} L ${x + 5} ${y - tip}`;
+}
+---
+<svg class="trace-grid" viewBox={`0 0 ${puzzle.size * 56 + 20} ${puzzle.size * 56 + 20}`} role="img" aria-labelledby={`${prefix}-title ${prefix}-description`}>
+  <title id={`${prefix}-title`}>The archived {puzzle.size}×{puzzle.size} puzzle for this response</title>
+  <desc id={`${prefix}-description`}>{Object.values(puzzle.givens).filter(value => value !== undefined).length} given digits and {puzzle.inequalities.length} inequalities. Letters name unknown cells. The pointed end of an inequality faces the smaller number.</desc>
+  {puzzle.solution.map((_, cell) => { const point = center(cell); const given = puzzle.givens[String(cell)]; return <g>
+    <rect x={point.x - 22} y={point.y - 22} width="44" height="44" rx="3" />
+    <text class:list={{ given: given !== undefined }} x={point.x} y={point.y + (given !== undefined ? 8 : 5)}>{given ?? String.fromCharCode(65 + cell)}</text>
+  </g>; })}
+  {puzzle.inequalities.map(([a,b]) => <path d={inequalityPath(a,b)} />)}
+</svg>
+<style>
+  .trace-grid { display: block; width: 100%; max-width: 290px; height: auto; margin-inline: auto; }
+  .trace-grid rect { fill: transparent; stroke: #b9c5b7; stroke-width: 1; }
+  .trace-grid text { font-family: var(--sans); font-size: 14px; fill: var(--muted); text-anchor: middle; }
+  .trace-grid text.given { font-size: 22px; fill: var(--ink); font-weight: 600; }
+  .trace-grid path { fill: none; stroke: var(--green); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+</style>

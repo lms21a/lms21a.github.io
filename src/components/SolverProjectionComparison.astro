@@ -1,0 +1,90 @@
+---
+import ResearchPlot from './ResearchPlot.astro';
+import desktop from '../assets/research/solver-projection-comparison.png';
+import mobile from '../assets/research/solver-projection-comparison-mobile.png';
+import data from '../data/solver-projection-comparison.json';
+const percent = (correct: number, total: number) => `${(100 * correct / total).toFixed(2)}%`;
+const pair = data.trace_pair;
+---
+<details class="solver-comparison" data-solver-comparison>
+  <summary><span class="note-kicker">The style tradeoff</span><span class="note-title">Why I kept the projected checkpoint</span><span class="note-description">Compare the scores, then read two saved responses to the same puzzle.</span></summary>
+  <div class="comparison-body">
+    <figure class="score-comparison">
+      <ResearchPlot desktop={desktop} mobile={mobile} alt="4×4 pass@1 endpoints: solver-grounded SFT with 512 examples and four epochs, 26.76%; projected SFT with 512 examples and two epochs, 11.43%; chosen projected SFT with 256 examples and one epoch, 4.20%. Training budgets differ." />
+      <figcaption>All three endpoints use 128 held-out puzzles × 8 attempts, 4,096 tokens, and temperature 1. Training example counts, epochs, and learning-rate schedules differ, so the endpoints don't establish relative learning speed.</figcaption>
+    </figure>
+    <details class="exact-scores">
+      <summary>Exact scores and training budgets</summary>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">SFT recipe</th><th scope="col">Updates</th><th scope="col">Pass@1</th><th scope="col">Pass@8</th></tr></thead>
+        <tbody>{data.recipes.map(recipe => <tr><th scope="row">{recipe.label}<small>{recipe.examples} examples × {recipe.epochs} {recipe.epochs === 1 ? 'epoch' : 'epochs'}</small></th><td>{recipe.optimizer_updates}</td><td>{percent(recipe.correct_completions, recipe.completions)}<small>{recipe.correct_completions}/{recipe.completions}</small></td><td>{percent(recipe.solved_puzzles, recipe.puzzles)}<small>{recipe.solved_puzzles}/{recipe.puzzles}</small></td></tr>)}</tbody>
+      </table></div>
+      <p class="small-note">The solver-grounded targets keep verified algorithmic steps fixed and reuse short model-written rule paraphrases. The projected targets allow a free-form response and refinements.</p>
+    </details>
+    <p class="trace-heading">Same puzzle, different voices</p>
+    <p class="trace-intro">Actual held-out generations after SFT. Both submit the same correct final assignment; their training budgets are shown above.</p>
+    <div class="trace-pair">
+      {pair.traces.map(trace => <section class="trace-card">
+        <p class="trace-label">{trace.label}</p>
+        <p class="trace-descriptor">{trace.descriptor}</p>
+        <p class="trace-metadata">{trace.tokens.toLocaleString('en-US')} generated tokens · excerpt</p>
+        <pre aria-label={`${trace.label}: verbatim excerpt`}>{trace.excerpt}</pre>
+        <details class="full-response"><summary>Read the complete response</summary><pre tabindex="0" aria-label={`${trace.label}: complete saved response`}>{trace.response}</pre></details>
+      </section>)}
+    </div>
+    <div class="shared-answer"><p>Accepted final assignment · both responses</p><code>{pair.submitted_answer}</code></div>
+    <p class="reasoning-note">The projected response invents restrictions involving L and repeatedly treats reuse across different groups as a conflict. Its conversational retries illustrate a style preference; a correct final answer does not make those intermediate claims sound.</p>
+    <details class="trace-source"><summary>Puzzle input and selection</summary>
+      <p>Seven givens, three inequalities. The prompt explicitly allows values to repeat across different groups.</p>
+      <pre tabindex="0" aria-label="The shared held-out puzzle input">{pair.model_input}</pre>
+      <p>Selected reproducibly: the first puzzle in the solver-trained output archive with a strict-correct response from both models, then each model's first correct response to it. There are {pair.common_solved_puzzles} puzzles solved by both on this panel. These examples don't estimate how often either style occurs.</p>
+      <p>Puzzle ID: <code>{pair.puzzle_id}</code>. Stored puzzle index {pair.traces[0].puzzle_index}; sample indices {pair.traces[0].sample_index} and {pair.traces[1].sample_index} (zero-based). All 1,024 paired archive positions have matching puzzle IDs, sample IDs, and prompt token IDs. The opening thinking tag is supplied in the input.</p>
+    </details>
+  </div>
+</details>
+<style>
+  .solver-comparison { border: 1px solid var(--rule); border-radius: 4px; margin-block: 30px; background: #f1f1e8; }
+  .solver-comparison > summary { padding: 20px 24px; cursor: pointer; list-style-position: inside; color: var(--green); }
+  .note-kicker { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+  .note-title { display: block; font-family: var(--serif); font-size: 28px; font-weight: 550; line-height: 1.2; color: var(--ink); margin-top: 9px; }
+  .note-description { display: block; font-size: 12px; line-height: 1.7; color: var(--muted); margin-top: 8px; }
+  .comparison-body { padding: 0 24px 24px; }
+  .score-comparison { margin: 0; }
+  .score-comparison figcaption, .small-note, .reasoning-note, .trace-source > p { font-size: 11px; line-height: 1.8; color: var(--muted); margin: 13px 0 0; text-align: left; }
+  .exact-scores { margin-top: 18px; }
+  .comparison-body summary { cursor: pointer; color: var(--green); font-size: 12px; line-height: 1.7; }
+  summary:focus-visible, pre:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .table-wrap { overflow-x: auto; }
+  table { display: table; width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.7; margin-top: 12px; }
+  th, td { min-width: 0; padding: 11px 6px; border-bottom: 1px solid var(--rule); text-align: right; vertical-align: top; }
+  th { font-weight: 500; }
+  th:first-child { text-align: left; }
+  th small, td small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; white-space: nowrap; }
+  .trace-heading { font-family: var(--serif); font-size: 27px; line-height: 1.3; margin: 30px 0 0; }
+  .trace-intro { color: var(--muted); font-size: 12px; line-height: 1.8; margin: 9px 0 0; }
+  .trace-pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 20px; }
+  .trace-card { min-width: 0; border: 1px solid var(--rule); border-radius: 3px; background: #faf9f5; padding: 17px 15px; }
+  .trace-label { color: var(--green); font-size: 12px; font-weight: 600; line-height: 1.6; margin: 0; }
+  .trace-descriptor { color: var(--ink); font-size: 12px; line-height: 1.7; margin: 5px 0 0; }
+  .trace-metadata { color: var(--muted); font-size: 10px; line-height: 1.7; margin: 9px 0 15px; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.85; color: var(--ink); margin: 0; background: transparent; padding: 0; }
+  .full-response { margin-top: 18px; }
+  .full-response > pre, .trace-source > pre { max-height: 420px; overflow-y: auto; border-top: 1px solid var(--rule); padding-top: 15px; margin-top: 15px; }
+  .shared-answer { padding: 17px 0; border-bottom: 1px solid var(--rule); }
+  .shared-answer > p { font-size: 10px; line-height: 1.7; color: var(--green); margin: 0; }
+  .shared-answer > code { display: block; padding: 0; margin-top: 9px; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; color: var(--green); background: transparent; }
+  .trace-source { margin-top: 18px; }
+  .trace-source code { font-size: 10px; padding: 0; overflow-wrap: anywhere; background: transparent; }
+  @media (max-width: 620px) {
+    .solver-comparison > summary { padding: 19px 16px; }
+    .note-title { font-size: 25px; }
+    .note-description { font-size: 13px; }
+    .comparison-body { padding: 0 15px 21px; }
+    .comparison-body summary { min-height: 44px; padding-block: 10px; }
+    .trace-heading { font-size: 25px; }
+    .trace-pair { grid-template-columns: minmax(0,1fr); gap: 13px; }
+    .trace-card { padding: 17px 14px; }
+    table { font-size: 11px; }
+    th, td { padding-inline: 5px; }
+  }
+</style>

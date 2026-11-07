@@ -1,0 +1,48 @@
+{
+  "id": "4_all:1,5,8,11:92",
+  "numbers": [
+    1,
+    5,
+    8,
+    11
+  ],
+  "target": 92,
+  "response": "We need to use the numbers 1, 5, 8, 11 exactly once to make 92, with each number once, repeated where needed, using parentheses, operations allowed (+, -, *, /), exact division, and all intermediate results positive.\nWe have to include all four numbers, possibly repeating them, and form a combination that equals 92.\n\nPossible approach: \nWe need to combine operations to reach 92.\n\nTry using multiplication and addition with careful parentheses.\n\nIdea: (11 × 8) + (5 × 1) = 88 + 5 = 93 → too big.\nAdjust: (8 × 11) - (5 + 1) = 88 - 6 = 82 → not 92.\n\nTry (11 + 8) × 5 - 1 = 19 × 5 - 1 = 95 - 1 = 94 → close.\nTry (11 × 8) + 5 - 1 = 88 + 5 - 1 = 92 → perfect!\n\nCheck numbers used: 11, 8, 5, 1 — all once.\nInterpretation:\n11 × 8 = 88, 5 - 1 = 4, 88 + 4 = 92.\n\nThis uses each number once and meets all conditions.\n</thinking>\n<answer>((11 × 8) + 5 - 1)</answer><|im_end|>",
+  "grade": {
+    "syntax_valid": true,
+    "numbers_correct": true,
+    "operations_allowed": true,
+    "intermediates_valid": true,
+    "legal": true,
+    "exact": true,
+    "value": 92,
+    "error": "",
+    "semantic_exact": true,
+    "single_terminal_answer": true,
+    "answer_tag_count": 1,
+    "equation_valid": true,
+    "expression": "((11 × 8) + 5 - 1)",
+    "exact_match": 1.0,
+    "format_valid": true,
+    "joint_success": true,
+    "success": 1.0,
+    "reward": 1.0,
+    "truncated": 0.0
+  },
+  "tokens": 310,
+  "checkpoint": "Post-Countdown · FlashREINFORCE update 50",
+  "panel": "128-puzzle validation panel · one attempt per puzzle",
+  "max_tokens": 4096,
+  "source": {
+    "path": "/mnt/d/SimplePT/runs/experiments/countdown_maxrl_bpo_post73_20261008/flashreinforce/eval/update_050/trajectories.jsonl.gz",
+    "line": 111,
+    "dataset_index": 110,
+    "rollout_index": 0,
+    "file_sha256": "a7e0dc826240328a15603a49e942dd9a98d31f447b34e73a8c827a623271f719",
+    "record_sha256": "f6e5b3b48fca7e9cb05910cbdba69348a5fccb7ea5cd6b1a39f7a88ef5c0751a",
+    "response_sha256": "a3980758238d5534ee14e41538cb5b963bdff142a400fa0e7b1bf9fcd7ebc449",
+    "policy": "/mnt/d/SimplePT/runs/experiments/countdown_maxrl_bpo_post73_20261008/flashreinforce/checkpoints/step_49/policy"
+  },
+  "excerpt_start": "Idea: (11 × 8)",
+  "excerpt_end": "This uses each number once and meets all conditions."
+}
